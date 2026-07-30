@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { CareerClient } from "@/components/career/CareerClient";
-import type { Application, Certification, NetworkingContact } from "@/types/database.types";
+import type { Application, Certification, NetworkingContact, User } from "@/types/database.types";
+
+type ResumeProfile = Pick<User, "resume_url" | "resume_updated_at">;
 
 export default async function CareerPage() {
   const supabase = await createClient();
@@ -22,8 +24,8 @@ export default async function CareerPage() {
       initialCertifications={(certifications as Certification[]) ?? []}
       initialApplications={(applications as Application[]) ?? []}
       initialNetworking={(networking as NetworkingContact[]) ?? []}
-      initialResumeUrl={profile?.resume_url ?? null}
-      initialResumeUpdatedAt={profile?.resume_updated_at ?? null}
+      initialResumeUrl={(profile as ResumeProfile | null)?.resume_url ?? null}
+      initialResumeUpdatedAt={(profile as ResumeProfile | null)?.resume_updated_at ?? null}
     />
   );
 }

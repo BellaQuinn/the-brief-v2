@@ -186,18 +186,53 @@ export interface DegreeWithTerms extends Degree {
   terms: TermWithCourses[];
 }
 
+// supabase-js's generic client requires each table to satisfy `GenericTable`
+// (Row/Insert/Update/Relationships) and the schema to satisfy `GenericSchema`
+// (Tables/Views/Functions) — without Relationships/Views/Functions here,
+// the constraint silently fails and query builder methods like .update()
+// and narrow .select() projections resolve their argument/result types to
+// `never` instead of erroring at the declaration site.
 export interface Database {
   public: {
     Tables: {
-      users: { Row: User; Insert: Partial<User> & { id: string; email: string }; Update: Partial<User> };
-      degrees: { Row: Degree; Insert: Partial<Degree>; Update: Partial<Degree> };
-      terms: { Row: Term; Insert: Partial<Term>; Update: Partial<Term> };
-      courses: { Row: Course; Insert: Partial<Course>; Update: Partial<Course> };
-      assignments: { Row: Assignment; Insert: Partial<Assignment>; Update: Partial<Assignment> };
-      certifications: { Row: Certification; Insert: Partial<Certification>; Update: Partial<Certification> };
-      applications: { Row: Application; Insert: Partial<Application>; Update: Partial<Application> };
-      networking: { Row: NetworkingContact; Insert: Partial<NetworkingContact>; Update: Partial<NetworkingContact> };
-      resources: { Row: Resource; Insert: Partial<Resource>; Update: Partial<Resource> };
+      users: {
+        Row: User;
+        Insert: Partial<User> & { id: string; email: string };
+        Update: Partial<User>;
+        Relationships: [];
+      };
+      degrees: { Row: Degree; Insert: Partial<Degree>; Update: Partial<Degree>; Relationships: [] };
+      terms: { Row: Term; Insert: Partial<Term>; Update: Partial<Term>; Relationships: [] };
+      courses: { Row: Course; Insert: Partial<Course>; Update: Partial<Course>; Relationships: [] };
+      assignments: {
+        Row: Assignment;
+        Insert: Partial<Assignment>;
+        Update: Partial<Assignment>;
+        Relationships: [];
+      };
+      certifications: {
+        Row: Certification;
+        Insert: Partial<Certification>;
+        Update: Partial<Certification>;
+        Relationships: [];
+      };
+      applications: {
+        Row: Application;
+        Insert: Partial<Application>;
+        Update: Partial<Application>;
+        Relationships: [];
+      };
+      networking: {
+        Row: NetworkingContact;
+        Insert: Partial<NetworkingContact>;
+        Update: Partial<NetworkingContact>;
+        Relationships: [];
+      };
+      resources: { Row: Resource; Insert: Partial<Resource>; Update: Partial<Resource>; Relationships: [] };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
