@@ -1,11 +1,8 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { PublicProgress } from "@/components/public/PublicProgress";
 
-export default async function RootPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  redirect(user ? "/brief" : "/login");
+// Signed-in visitors are redirected to /brief by middleware before this
+// ever renders (same pattern as /login and /signup) — this component only
+// ever runs for signed-out visitors.
+export default function RootPage() {
+  return <PublicProgress />;
 }

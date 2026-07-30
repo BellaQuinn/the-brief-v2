@@ -33,7 +33,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
+  // Root is public too (the read-only progress page), but must be an exact
+  // match — startsWith("/") would match every path and disable the gate.
+  const isPublicRoute =
+    request.nextUrl.pathname === "/" ||
+    PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
 
   if (!user && !isPublicRoute) {
     const redirectUrl = request.nextUrl.clone();

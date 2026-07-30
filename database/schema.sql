@@ -200,6 +200,12 @@ create index resources_user_id_idx on public.resources(user_id);
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
 
+-- service_role bypasses RLS by design, but still needs base GRANTs like
+-- any other role — used server-side only (lib/supabase/admin.ts) for the
+-- public progress page, never exposed to the browser.
+grant usage on schema public to service_role;
+grant select, insert, update, delete on all tables in schema public to service_role;
+
 -- ============================================================================
 -- ROW LEVEL SECURITY
 -- Every table: users can only ever read/write their own data.
