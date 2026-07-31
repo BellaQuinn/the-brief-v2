@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, GraduationCap, Briefcase, Library, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, Settings, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types/database.types";
 
 const NAV_ITEMS = [
   { href: "/brief", label: "The Brief", icon: LayoutDashboard },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/academics", label: "Academics", icon: GraduationCap },
   { href: "/career", label: "Career", icon: Briefcase },
   { href: "/resources", label: "Resources", icon: Library },

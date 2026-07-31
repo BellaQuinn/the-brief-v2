@@ -172,6 +172,14 @@ export interface AssignmentWithContext extends Assignment {
   course: Pick<Course, "id" | "course_code" | "course_name">;
 }
 
+// Calendar needs to say *which degree* a due date belongs to (useful once a
+// user has several), hence the extra nesting through term -> degree.
+export interface AssignmentWithDegreeContext extends Assignment {
+  course: Pick<Course, "course_code" | "course_name"> & {
+    term: { degree: Pick<Degree, "degree_name"> };
+  };
+}
+
 // Academics workspace nests courses under terms under a degree. Assignments
 // are lazy-loaded per course (fetched on first expand), hence optional.
 export interface CourseWithAssignments extends Course {

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, Briefcase, Library, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/brief", label: "Brief", icon: LayoutDashboard },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/academics", label: "Academics", icon: GraduationCap },
   { href: "/career", label: "Career", icon: Briefcase },
   { href: "/resources", label: "Resources", icon: Library },

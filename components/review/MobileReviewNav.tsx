@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, Briefcase, Library } from "lucide-react";
+import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileReviewNav({ token }: { token: string }) {
@@ -11,6 +11,7 @@ export function MobileReviewNav({ token }: { token: string }) {
 
   const navItems = [
     { href: `${base}/brief`, label: "Brief", icon: LayoutDashboard },
+    { href: `${base}/calendar`, label: "Calendar", icon: Calendar },
     { href: `${base}/academics`, label: "Academics", icon: GraduationCap },
     { href: `${base}/career`, label: "Career", icon: Briefcase },
     { href: `${base}/resources`, label: "Resources", icon: Library },
