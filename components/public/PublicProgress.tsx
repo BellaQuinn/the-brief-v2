@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ReadOnlyDegreeCard, ReadOnlyTermsList } from "@/components/shared/ReadOnlyAcademics";
 import { ReadOnlyCertificationsList } from "@/components/shared/ReadOnlyCertifications";
+import { sortDegrees } from "@/lib/utils";
 import type { Certification, DegreeWithTerms } from "@/types/database.types";
 
 // Single-tenant for now: this app has one user. If it ever supports
@@ -25,15 +26,14 @@ export async function PublicProgress() {
     );
   }
 
-  const [{ data: degree }, { data: certifications }] = await Promise.all([
+  const [{ data: degrees }, { data: certifications }] = await Promise.all([
     supabase
       .from("degrees")
       .select("*, terms(*, courses(*))")
       .eq("user_id", profile.id)
+      .order("created_at", { ascending: true })
       .order("created_at", { ascending: true, referencedTable: "terms" })
-      .order("created_at", { ascending: true, referencedTable: "terms.courses" })
-      .limit(1)
-      .maybeSingle(),
+      .order("created_at", { ascending: true, referencedTable: "terms.courses" }),
     supabase
       .from("certifications")
       .select("*")
@@ -41,7 +41,7 @@ export async function PublicProgress() {
       .order("exam_date", { ascending: true, nullsFirst: false }),
   ]);
 
-  const typedDegree = degree as DegreeWithTerms | null;
+  const typedDegrees = sortDegrees((degrees as DegreeWithTerms[]) ?? []);
   const typedCerts = (certifications as Certification[]) ?? [];
 
   return (
@@ -59,15 +59,20 @@ export async function PublicProgress() {
           </Link>
         </div>
 
-        {typedDegree ? (
-          <ReadOnlyDegreeCard degree={typedDegree} />
+        {typedDegrees.length > 0 ? (
+          <div className="space-y-8">
+            {typedDegrees.map((degree) => (
+              <div key={degree.id}>
+                <ReadOnlyDegreeCard degree={degree} />
+                <ReadOnlyTermsList terms={degree.terms} />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="rounded-card border border-dashed border-border px-6 py-10 text-center">
             <p className="text-sm text-ink-secondary">No degree plan published yet.</p>
           </div>
         )}
-
-        {typedDegree && <ReadOnlyTermsList terms={typedDegree.terms} />}
 
         <ReadOnlyCertificationsList certifications={typedCerts} />
       </div>

@@ -13,11 +13,17 @@ export default async function BriefPage() {
   // Assignments are queried directly here — never duplicated or cached
   // separately. Academics and any future calendar view read from the same
   // table, so "today's focus" is always in sync with what's on a course page.
+  // Scoped to the active degree via inner joins: a planned degree (e.g. a
+  // Master's not started yet) can carry its own future terms/courses, and
+  // those shouldn't surface here until that degree actually becomes active.
   const { data: dueAssignments } = await supabase
     .from("assignments")
-    .select("*, course:courses(id, course_code, course_name)")
+    .select(
+      "*, course:courses!inner(id, course_code, course_name, term:terms!inner(degree:degrees!inner(status)))"
+    )
     .not("status", "in", "(submitted,graded)")
     .lte("due_date", weekOut.toISOString())
+    .eq("course.term.degree.status", "active")
     .order("due_date", { ascending: true })
     .returns<AssignmentWithContext[]>();
 

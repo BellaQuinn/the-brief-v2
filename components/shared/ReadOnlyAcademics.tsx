@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+import { DEGREE_STATUS_BADGE_CLASS, DEGREE_STATUS_LABEL } from "@/lib/degreeStatus";
 import type { DegreeWithTerms } from "@/types/database.types";
 
 /**
@@ -13,8 +15,20 @@ export function ReadOnlyDegreeCard({ degree }: { degree: DegreeWithTerms }) {
 
   return (
     <div className="rounded-card border border-border bg-surface p-5">
-      <p className="eyebrow mb-1">{degree.school_name}</p>
-      <h2 className="font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="eyebrow mb-1 truncate">{degree.school_name}</p>
+          <h2 className="truncate font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
+        </div>
+        <span
+          className={cn(
+            "shrink-0 rounded-full border px-2.5 py-0.5 text-xs",
+            DEGREE_STATUS_BADGE_CLASS[degree.status]
+          )}
+        >
+          {DEGREE_STATUS_LABEL[degree.status]}
+        </span>
+      </div>
 
       <div className="mt-5">
         <div className="mb-1.5 flex items-center justify-between text-xs text-ink-secondary">

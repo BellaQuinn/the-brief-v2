@@ -34,6 +34,7 @@ export function DegreeForm({ degree, onSaved, onCancel }: DegreeFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setError(null);
     setLoading(true);
 

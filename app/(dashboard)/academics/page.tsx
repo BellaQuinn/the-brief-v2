@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AcademicsClient } from "@/components/academics/AcademicsClient";
+import { sortDegrees } from "@/lib/utils";
 import type { DegreeWithTerms } from "@/types/database.types";
 
 export default async function AcademicsPage() {
@@ -8,13 +9,12 @@ export default async function AcademicsPage() {
   // Assignments are deliberately not fetched here — CourseRow lazy-loads
   // them per-course on first expand, since a full degree plan can carry
   // hundreds of assignments the user never opens in a given session.
-  const { data: degree } = await supabase
+  const { data: degrees } = await supabase
     .from("degrees")
     .select("*, terms(*, courses(*))")
+    .order("created_at", { ascending: true })
     .order("created_at", { ascending: true, referencedTable: "terms" })
-    .order("created_at", { ascending: true, referencedTable: "terms.courses" })
-    .limit(1)
-    .maybeSingle();
+    .order("created_at", { ascending: true, referencedTable: "terms.courses" });
 
-  return <AcademicsClient initialDegree={degree as DegreeWithTerms | null} />;
+  return <AcademicsClient initialDegrees={sortDegrees((degrees as DegreeWithTerms[]) ?? [])} />;
 }

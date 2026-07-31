@@ -1,53 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
 import { DegreeForm } from "@/components/academics/DegreeForm";
 import { cn } from "@/lib/utils";
+import { DEGREE_STATUS_BADGE_CLASS, DEGREE_STATUS_LABEL } from "@/lib/degreeStatus";
 import type { Degree } from "@/types/database.types";
-
-const STATUS_LABEL: Record<Degree["status"], string> = {
-  active: "Active",
-  planned: "Planned",
-  paused: "Paused",
-  completed: "Completed",
-};
 
 export function DegreeSummary({
   degree,
   onSaved,
+  onDeleted,
 }: {
-  degree: Degree | null;
+  degree: Degree;
   onSaved: (degree: Degree) => void;
+  onDeleted: (degreeId: string) => void;
 }) {
+  const supabase = createClient();
   const [editing, setEditing] = useState(false);
-
-  if (!degree) {
-    return (
-      <div className="rounded-card border border-dashed border-border px-6 py-10 text-center">
-        <p className="mb-4 text-sm text-ink-secondary">No degree plan set up yet.</p>
-        <Button onClick={() => setEditing(true)} className="mx-auto">
-          Set up your degree plan
-        </Button>
-        <Modal open={editing} onClose={() => setEditing(false)} title="Set up degree plan">
-          <DegreeForm
-            onSaved={(d) => {
-              onSaved(d);
-              setEditing(false);
-            }}
-            onCancel={() => setEditing(false)}
-          />
-        </Modal>
-      </div>
-    );
-  }
+  const [deleting, setDeleting] = useState(false);
 
   const pct =
     degree.total_credits && degree.total_credits > 0
       ? Math.min(100, Math.round((degree.completed_credits / degree.total_credits) * 100))
       : 0;
+
+  async function handleDelete() {
+    if (deleting) return;
+
+    const confirmed = window.confirm(
+      `Delete "${degree.degree_name}"? This removes all its terms, courses, and assignments too.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    const { error } = await supabase.from("degrees").delete().eq("id", degree.id);
+    if (error) {
+      setDeleting(false);
+      alert(error.message);
+      return;
+    }
+    onDeleted(degree.id);
+  }
 
   return (
     <div className="rounded-card border border-border bg-surface p-5">
@@ -57,23 +53,25 @@ export function DegreeSummary({
           <h2 className="truncate font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
           {degree.major && <p className="mt-0.5 truncate text-sm text-ink-secondary">{degree.major}</p>}
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <span
-            className={cn(
-              "rounded-full border px-2.5 py-0.5 text-xs",
-              degree.status === "active"
-                ? "border-signal/40 text-signal"
-                : "border-border-strong text-ink-tertiary"
-            )}
-          >
-            {STATUS_LABEL[degree.status]}
+        <div className="flex shrink-0 items-center gap-2">
+          <span className={cn("rounded-full border px-2.5 py-0.5 text-xs", DEGREE_STATUS_BADGE_CLASS[degree.status])}>
+            {DEGREE_STATUS_LABEL[degree.status]}
           </span>
           <button
             onClick={() => setEditing(true)}
+            disabled={deleting}
             aria-label="Edit degree"
-            className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
+            className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary disabled:pointer-events-none disabled:opacity-40"
           >
             <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            aria-label="Delete degree"
+            className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk disabled:pointer-events-none disabled:opacity-40"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

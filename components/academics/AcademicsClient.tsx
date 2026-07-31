@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
-import { DegreeSummary } from "@/components/academics/DegreeSummary";
-import { TermSection } from "@/components/academics/TermSection";
-import { TermForm } from "@/components/academics/TermForm";
+import { DegreeSection } from "@/components/academics/DegreeSection";
+import { DegreeForm } from "@/components/academics/DegreeForm";
+import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { sortDegrees } from "@/lib/utils";
 import type {
   Assignment,
   Course,
   CourseWithAssignments,
+  Degree,
   DegreeWithTerms,
   Term,
-  TermWithCourses,
 } from "@/types/database.types";
 
 export interface AcademicsActions {
@@ -26,149 +27,182 @@ export interface AcademicsActions {
   onAssignmentDeleted: (courseId: string, assignmentId: string) => void;
 }
 
-function mapCourseByCourseId(
-  terms: TermWithCourses[],
-  courseId: string,
-  update: (course: CourseWithAssignments) => CourseWithAssignments
-): TermWithCourses[] {
-  return terms.map((term) => ({
-    ...term,
-    courses: term.courses.map((c) => (c.id === courseId ? update(c) : c)),
+// Every handler below searches across all degrees' terms/courses by ID
+// rather than requiring a degreeId param — keeps AcademicsActions (already
+// consumed by TermSection/CourseRow/AssignmentRow) unchanged now that a
+// user can have more than one degree.
+
+function upsertTermAcrossDegrees(degrees: DegreeWithTerms[], term: Term): DegreeWithTerms[] {
+  const existsSomewhere = degrees.some((d) => d.terms.some((t) => t.id === term.id));
+  if (existsSomewhere) {
+    return degrees.map((d) => ({
+      ...d,
+      terms: d.terms.map((t) => (t.id === term.id ? { ...t, ...term } : t)),
+    }));
+  }
+  return degrees.map((d) =>
+    d.id === term.degree_id ? { ...d, terms: [...d.terms, { ...term, courses: [] }] } : d
+  );
+}
+
+function removeTermAcrossDegrees(degrees: DegreeWithTerms[], termId: string): DegreeWithTerms[] {
+  return degrees.map((d) => ({ ...d, terms: d.terms.filter((t) => t.id !== termId) }));
+}
+
+function upsertCourseAcrossDegrees(degrees: DegreeWithTerms[], termId: string, course: Course): DegreeWithTerms[] {
+  return degrees.map((d) => ({
+    ...d,
+    terms: d.terms.map((term) => {
+      if (term.id !== termId) return term;
+      const exists = term.courses.some((c) => c.id === course.id);
+      const courses = exists
+        ? term.courses.map((c) => (c.id === course.id ? { ...c, ...course } : c))
+        : [...term.courses, course as CourseWithAssignments];
+      return { ...term, courses };
+    }),
   }));
 }
 
-export function AcademicsClient({ initialDegree }: { initialDegree: DegreeWithTerms | null }) {
-  const [degree, setDegree] = useState<DegreeWithTerms | null>(initialDegree);
-  const [addingTerm, setAddingTerm] = useState(false);
+function removeCourseAcrossDegrees(degrees: DegreeWithTerms[], termId: string, courseId: string): DegreeWithTerms[] {
+  return degrees.map((d) => ({
+    ...d,
+    terms: d.terms.map((term) =>
+      term.id === termId ? { ...term, courses: term.courses.filter((c) => c.id !== courseId) } : term
+    ),
+  }));
+}
+
+function mapCourseByCourseIdAcrossDegrees(
+  degrees: DegreeWithTerms[],
+  courseId: string,
+  update: (course: CourseWithAssignments) => CourseWithAssignments
+): DegreeWithTerms[] {
+  return degrees.map((d) => ({
+    ...d,
+    terms: d.terms.map((term) => ({
+      ...term,
+      courses: term.courses.map((c) => (c.id === courseId ? update(c) : c)),
+    })),
+  }));
+}
+
+export function AcademicsClient({ initialDegrees }: { initialDegrees: DegreeWithTerms[] }) {
+  const [degrees, setDegrees] = useState<DegreeWithTerms[]>(initialDegrees);
+  const [addingDegree, setAddingDegree] = useState(false);
+  const [focusDegreeId, setFocusDegreeId] = useState<string | null>(null);
+
+  // Runs after the newly added degree's section has actually rendered, so
+  // the user lands on it and can keep going straight into adding terms.
+  useEffect(() => {
+    if (!focusDegreeId) return;
+    const el = document.getElementById(`degree-${focusDegreeId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.focus({ preventScroll: true });
+    }
+    setFocusDegreeId(null);
+  }, [focusDegreeId, degrees]);
 
   const actions: AcademicsActions = {
     onTermSaved(term) {
-      setDegree((prev) => {
-        if (!prev) return prev;
-        const exists = prev.terms.some((t) => t.id === term.id);
-        const terms = exists
-          ? prev.terms.map((t) => (t.id === term.id ? { ...t, ...term } : t))
-          : [...prev.terms, { ...term, courses: [] }];
-        return { ...prev, terms };
-      });
+      setDegrees((prev) => upsertTermAcrossDegrees(prev, term));
     },
     onTermDeleted(termId) {
-      setDegree((prev) => (prev ? { ...prev, terms: prev.terms.filter((t) => t.id !== termId) } : prev));
+      setDegrees((prev) => removeTermAcrossDegrees(prev, termId));
     },
     onCourseSaved(termId, course) {
-      setDegree((prev) => {
-        if (!prev) return prev;
-        const terms = prev.terms.map((term) => {
-          if (term.id !== termId) return term;
-          const exists = term.courses.some((c) => c.id === course.id);
-          const courses = exists
-            ? term.courses.map((c) => (c.id === course.id ? { ...c, ...course } : c))
-            : [...term.courses, course as CourseWithAssignments];
-          return { ...term, courses };
-        });
-        return { ...prev, terms };
-      });
+      setDegrees((prev) => upsertCourseAcrossDegrees(prev, termId, course));
     },
     onCourseDeleted(termId, courseId) {
-      setDegree((prev) => {
-        if (!prev) return prev;
-        const terms = prev.terms.map((term) =>
-          term.id === termId ? { ...term, courses: term.courses.filter((c) => c.id !== courseId) } : term
-        );
-        return { ...prev, terms };
-      });
+      setDegrees((prev) => removeCourseAcrossDegrees(prev, termId, courseId));
     },
     onAssignmentsLoaded(courseId, assignments) {
-      setDegree((prev) =>
-        prev ? { ...prev, terms: mapCourseByCourseId(prev.terms, courseId, (c) => ({ ...c, assignments })) } : prev
-      );
+      setDegrees((prev) => mapCourseByCourseIdAcrossDegrees(prev, courseId, (c) => ({ ...c, assignments })));
     },
     onAssignmentSaved(courseId, assignment) {
-      setDegree((prev) =>
-        prev
-          ? {
-              ...prev,
-              terms: mapCourseByCourseId(prev.terms, courseId, (c) => {
-                const existing = c.assignments ?? [];
-                const exists = existing.some((a) => a.id === assignment.id);
-                return {
-                  ...c,
-                  assignments: exists
-                    ? existing.map((a) => (a.id === assignment.id ? assignment : a))
-                    : [...existing, assignment],
-                };
-              }),
-            }
-          : prev
+      setDegrees((prev) =>
+        mapCourseByCourseIdAcrossDegrees(prev, courseId, (c) => {
+          const existing = c.assignments ?? [];
+          const exists = existing.some((a) => a.id === assignment.id);
+          return {
+            ...c,
+            assignments: exists
+              ? existing.map((a) => (a.id === assignment.id ? assignment : a))
+              : [...existing, assignment],
+          };
+        })
       );
     },
     onAssignmentDeleted(courseId, assignmentId) {
-      setDegree((prev) =>
-        prev
-          ? {
-              ...prev,
-              terms: mapCourseByCourseId(prev.terms, courseId, (c) => ({
-                ...c,
-                assignments: (c.assignments ?? []).filter((a) => a.id !== assignmentId),
-              })),
-            }
-          : prev
+      setDegrees((prev) =>
+        mapCourseByCourseIdAcrossDegrees(prev, courseId, (c) => ({
+          ...c,
+          assignments: (c.assignments ?? []).filter((a) => a.id !== assignmentId),
+        }))
       );
     },
   };
+
+  function handleDegreeSaved(d: Degree) {
+    setDegrees((prev) => sortDegrees(prev.map((deg) => (deg.id === d.id ? { ...deg, ...d } : deg))));
+  }
+
+  function handleDegreeDeleted(degreeId: string) {
+    setDegrees((prev) => prev.filter((deg) => deg.id !== degreeId));
+  }
 
   return (
     <div>
       <WorkspaceHeader
         eyebrow="ACADEMICS"
-        title="Degree plan"
-        subtitle={degree ? `${degree.terms.length} terms tracked` : "Set up your degree to get started"}
+        title="Degree plans"
+        subtitle={
+          degrees.length > 0
+            ? `${degrees.length} degree${degrees.length === 1 ? "" : "s"} tracked`
+            : "Add your first degree to get started"
+        }
+        action={
+          <button
+            onClick={() => setAddingDegree(true)}
+            className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add degree
+          </button>
+        }
       />
 
-      <div className="space-y-6 px-4 py-6 md:px-8">
-        <DegreeSummary
-          degree={degree}
-          onSaved={(d) => setDegree((prev) => (prev ? { ...prev, ...d } : { ...d, terms: [] }))}
-        />
-
-        {degree && (
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink-primary">Terms</h2>
-              <button
-                onClick={() => setAddingTerm(true)}
-                className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add term
-              </button>
-            </div>
-
-            {degree.terms.length === 0 ? (
-              <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
-                <p className="text-sm text-ink-secondary">No terms yet. Add your first one.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {degree.terms.map((term) => (
-                  <TermSection key={term.id} term={term} actions={actions} />
-                ))}
-              </div>
-            )}
-
-            <Modal open={addingTerm} onClose={() => setAddingTerm(false)} title="Add term">
-              <TermForm
-                degreeId={degree.id}
-                onSaved={(t) => {
-                  actions.onTermSaved(t);
-                  setAddingTerm(false);
-                }}
-                onCancel={() => setAddingTerm(false)}
-              />
-            </Modal>
+      <div className="space-y-8 px-4 py-6 md:px-8">
+        {degrees.length === 0 ? (
+          <div className="rounded-card border border-dashed border-border px-6 py-10 text-center">
+            <p className="mb-4 text-sm text-ink-secondary">No degree plans set up yet.</p>
+            <Button onClick={() => setAddingDegree(true)} className="mx-auto">
+              Set up your first degree
+            </Button>
           </div>
+        ) : (
+          degrees.map((degree) => (
+            <DegreeSection
+              key={degree.id}
+              degree={degree}
+              actions={actions}
+              onDegreeSaved={handleDegreeSaved}
+              onDegreeDeleted={handleDegreeDeleted}
+            />
+          ))
         )}
       </div>
+
+      <Modal open={addingDegree} onClose={() => setAddingDegree(false)} title="Add degree">
+        <DegreeForm
+          onSaved={(d) => {
+            setDegrees((prev) => sortDegrees([...prev, { ...d, terms: [] }]));
+            setAddingDegree(false);
+            setFocusDegreeId(d.id);
+          }}
+          onCancel={() => setAddingDegree(false)}
+        />
+      </Modal>
     </div>
   );
 }
