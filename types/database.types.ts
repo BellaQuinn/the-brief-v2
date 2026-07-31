@@ -88,6 +88,11 @@ export interface Course {
   status: CourseStatus;
   // Added by database/migrate_v1_data.sql — not in the original schema.sql.
   notes: string | null;
+  // Added by database/add_academic_standing.sql. Escape hatch for a grade
+  // assignment data can't capture (instructor curve, transfer/legacy
+  // course) — a grade string from the institution policy's scale, e.g.
+  // "A-", or a non-GPA mark like "W"/"I"/"P"/"AU".
+  final_grade_override: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -104,6 +109,14 @@ export interface Assignment {
   status: AssignmentStatus;
   priority: PriorityLevel;
   estimated_minutes: number | null;
+  // Added by database/add_academic_standing.sql. If set on any included
+  // assignment in a course, that course's grade is a weight-normalized
+  // average instead of simple points aggregation.
+  weight_percent: number | null;
+  // Added by database/add_academic_standing.sql. Excludes this assignment
+  // from grade calculations (extra credit, a dropped lowest score) without
+  // deleting it.
+  grade_excluded: boolean;
   created_at: string;
   updated_at: string;
 }

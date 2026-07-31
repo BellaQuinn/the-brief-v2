@@ -155,7 +155,8 @@ export function AcademicsClient({ initialDegrees }: { initialDegrees: DegreeWith
     <div>
       <WorkspaceHeader
         eyebrow="ACADEMICS"
-        title="Degree plans"
+        title="Overview"
+        hideDots
         subtitle={
           degrees.length > 0
             ? `${degrees.length} degree${degrees.length === 1 ? "" : "s"} tracked`

@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
 import { FocusList } from "@/components/brief/FocusList";
 import { StatTile } from "@/components/brief/StatTile";
+import { GpaCard } from "@/components/brief/GpaCard";
+import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
+import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/academicStanding/build";
 import type { AssignmentWithContext } from "@/types/database.types";
 
 export default async function BriefPage() {
@@ -34,7 +37,7 @@ export default async function BriefPage() {
     (a) => a.due_date && new Date(a.due_date) > endOfDay(now)
   );
 
-  const [{ count: openApplications }, { count: activeCerts }] = await Promise.all([
+  const [{ count: openApplications }, { count: activeCerts }, { data: activeDegree }] = await Promise.all([
     supabase
       .from("applications")
       .select("*", { count: "exact", head: true })
@@ -43,7 +46,18 @@ export default async function BriefPage() {
       .from("certifications")
       .select("*", { count: "exact", head: true })
       .in("status", ["studying", "scheduled"]),
+    // Same active-degree rule as the due-today query above — the GPA card
+    // reflects "am I on track right now," not every degree on file.
+    supabase
+      .from("degrees")
+      .select("*, terms(*, courses(*, assignments(*)))")
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle(),
   ]);
+
+  const typedActiveDegree = activeDegree as DegreeWithFullTerms | null;
+  const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
 
   return (
     <div>
@@ -52,7 +66,7 @@ export default async function BriefPage() {
         title="What deserves your attention today"
       />
 
-      <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-3 md:px-8">
+      <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
         <StatTile
           label="Due today"
           value={String(today.length)}
@@ -60,6 +74,13 @@ export default async function BriefPage() {
         />
         <StatTile label="Open applications" value={String(openApplications ?? 0)} />
         <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} />
+        {standing && (
+          <GpaCard
+            cumulativeGpa={standing.cumulativeGpa.gpa}
+            termGpa={standing.termGpa?.gpa ?? null}
+            graduationForecast={standing.graduationForecast}
+          />
+        )}
       </div>
 
       <section className="px-4 pt-8 md:px-8">

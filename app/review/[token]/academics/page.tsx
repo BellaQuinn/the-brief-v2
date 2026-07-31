@@ -25,7 +25,7 @@ export default async function ReviewAcademicsPage() {
 
   return (
     <div>
-      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // ACADEMICS" title="Degree plans" />
+      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // ACADEMICS" title="Overview" hideDots />
       <div className="space-y-6 px-4 py-6 md:px-8">
         {typedDegrees.length > 0 ? (
           <div className="space-y-8">
