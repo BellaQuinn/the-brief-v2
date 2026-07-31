@@ -25,7 +25,7 @@ export default async function ReviewAcademicsPage() {
 
   return (
     <div>
-      <WorkspaceHeader eyebrow="REVIEW // ACADEMICS" title="Degree plan" />
+      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // ACADEMICS" title="Degree plan" />
       <div className="space-y-6 px-8 py-6">
         {typedDegree ? (
           <ReadOnlyDegreeCard degree={typedDegree} />

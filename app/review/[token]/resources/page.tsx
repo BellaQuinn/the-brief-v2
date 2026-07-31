@@ -21,7 +21,7 @@ export default async function ReviewResourcesPage() {
 
   return (
     <div>
-      <WorkspaceHeader eyebrow="REVIEW // RESOURCES" title="Resource library" />
+      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // RESOURCES" title="Resource library" />
       <div className="px-8 py-6">
         <ReadOnlyResources resources={(resources as Resource[]) ?? []} />
       </div>

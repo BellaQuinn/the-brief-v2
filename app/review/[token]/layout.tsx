@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ReviewSidebar } from "@/components/review/ReviewSidebar";
+import { ReviewBanner } from "@/components/review/ReviewBanner";
 
 export default async function ReviewLayout({
   children,
@@ -19,7 +20,10 @@ export default async function ReviewLayout({
   return (
     <div className="flex">
       <ReviewSidebar token={token} />
-      <main className="min-h-screen flex-1 overflow-y-auto bg-background">{children}</main>
+      <main className="min-h-screen flex-1 overflow-y-auto bg-background">
+        <ReviewBanner />
+        {children}
+      </main>
     </div>
   );
 }

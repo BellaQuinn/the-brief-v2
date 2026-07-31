@@ -30,7 +30,7 @@ export default async function ReviewCareerPage() {
 
   return (
     <div>
-      <WorkspaceHeader eyebrow="REVIEW // CAREER" title="Career" />
+      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // CAREER" title="Career" />
       <div className="space-y-8 px-8 py-6">
         <ReadOnlyCertificationsList certifications={(certifications as Certification[]) ?? []} />
         <section>

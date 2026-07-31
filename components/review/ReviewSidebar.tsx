@@ -57,7 +57,7 @@ export function ReviewSidebar({ token }: { token: string }) {
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-seal-dim text-seal">
             <Eye className="h-3.5 w-3.5" />
           </div>
-          <p className="truncate text-sm text-ink-secondary">Read-only review</p>
+          <p className="truncate text-sm text-ink-secondary">Portfolio Preview</p>
         </div>
       </div>
     </aside>

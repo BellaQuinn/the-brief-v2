@@ -43,7 +43,7 @@ export default async function ReviewBriefPage() {
 
   return (
     <div>
-      <WorkspaceHeader eyebrow="REVIEW // BRIEF" title="What deserves attention" />
+      <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // BRIEF" title="What deserves attention" />
 
       <div className="grid grid-cols-3 gap-4 px-8 pt-6">
         <StatTile
