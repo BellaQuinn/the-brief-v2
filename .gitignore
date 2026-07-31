@@ -1,7 +1,29 @@
+# Dependencies
 node_modules/
+
+# Build output
 .next/
+out/
+dist/
+build/
+
+# Test coverage
+coverage/
+
+# Env files — never commit real values, only .env.example
 .env
-.env.local
+.env*.local
+
+# Vercel CLI local project link/config
+.vercel
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS / editor
 .DS_Store
+*.pem
+
+# Local-only Claude Code settings (machine-specific permissions)
 .claude/settings.local.json
