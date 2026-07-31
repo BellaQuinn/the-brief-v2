@@ -16,7 +16,7 @@ export default async function ReviewAcademicsLayout({
         <span className="h-2 w-2 rounded-full bg-seal/70" />
         <span className="h-2 w-2 rounded-full bg-status-onTrack/70" />
       </div>
-      <AcademicsSubNav basePath={`/review/${token}/academics`} />
+      <AcademicsSubNav basePath={`/review/${token}/academics`} includeGraduateLawSchool={false} />
       {children}
     </div>
   );

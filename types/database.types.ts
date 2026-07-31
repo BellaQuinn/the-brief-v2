@@ -36,6 +36,19 @@ export type ApplicationStatus =
   | "rejected"
   | "withdrawn";
 export type ResourceCategory = "book" | "article" | "template" | "link" | "course" | "other";
+export type LawSchoolStatus =
+  | "researching"
+  | "planning_to_apply"
+  | "applying"
+  | "applied"
+  | "waitlisted"
+  | "accepted"
+  | "rejected"
+  | "enrolled";
+export type LawSchoolPriority = "dream" | "reach" | "target" | "safety";
+export type ScholarshipStatus = "researching" | "eligible" | "applying" | "applied" | "awarded" | "declined";
+export type MilestoneStatus = "upcoming" | "in_progress" | "completed";
+export type DocumentCategory = "essay" | "recommendation" | "transcript" | "financial" | "other";
 
 export interface User {
   id: string;
@@ -46,6 +59,11 @@ export interface User {
   timezone: string;
   resume_url: string | null;
   resume_updated_at: string | null;
+  // Added by database/add_graduate_law_school.sql — singleton LSAT prep
+  // settings, same pattern as resume_url/resume_updated_at above.
+  lsat_goal_score: number | null;
+  lsat_diagnostic_score: number | null;
+  lsat_planned_test_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -176,6 +194,85 @@ export interface Resource {
 }
 
 // ----------------------------------------------------------------------------
+// Graduate & Law School — direct-ownership tables (user_id -> users), same
+// simple-RLS pattern as Certification/Application/NetworkingContact/Resource
+// above, not nested through degree/term/course like Academics.
+// ----------------------------------------------------------------------------
+export interface LawSchool {
+  id: string;
+  user_id: string;
+  school_name: string;
+  status: LawSchoolStatus;
+  priority: LawSchoolPriority | null;
+  application_deadline: string | null;
+  lsat_requirement: number | null;
+  median_gpa: number | null;
+  median_lsat: number | null;
+  essays_status: string | null;
+  recommendations_status: string | null;
+  why_this_school: string | null;
+  personal_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Scholarship {
+  id: string;
+  user_id: string;
+  law_school_id: string | null;
+  name: string;
+  amount: number | null;
+  deadline: string | null;
+  status: ScholarshipStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LsatPracticeTest {
+  id: string;
+  user_id: string;
+  test_date: string;
+  source: string | null;
+  scaled_score: number | null;
+  logical_reasoning_score: number | null;
+  reading_comprehension_score: number | null;
+  analytical_reasoning_score: number | null;
+  timed: boolean;
+  confidence: number | null;
+  missed_questions: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LawSchoolDocument {
+  id: string;
+  user_id: string;
+  law_school_id: string | null;
+  title: string;
+  category: DocumentCategory;
+  url: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Milestone {
+  id: string;
+  user_id: string;
+  title: string;
+  target_date: string | null;
+  status: MilestoneStatus;
+  progress: number;
+  notes: string | null;
+  linked_href: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
 // dashboard, calendar, and course views all consume, joined once at the
@@ -250,6 +347,21 @@ export interface Database {
         Relationships: [];
       };
       resources: { Row: Resource; Insert: Partial<Resource>; Update: Partial<Resource>; Relationships: [] };
+      law_schools: { Row: LawSchool; Insert: Partial<LawSchool>; Update: Partial<LawSchool>; Relationships: [] };
+      scholarships: { Row: Scholarship; Insert: Partial<Scholarship>; Update: Partial<Scholarship>; Relationships: [] };
+      lsat_practice_tests: {
+        Row: LsatPracticeTest;
+        Insert: Partial<LsatPracticeTest>;
+        Update: Partial<LsatPracticeTest>;
+        Relationships: [];
+      };
+      law_school_documents: {
+        Row: LawSchoolDocument;
+        Insert: Partial<LawSchoolDocument>;
+        Update: Partial<LawSchoolDocument>;
+        Relationships: [];
+      };
+      milestones: { Row: Milestone; Insert: Partial<Milestone>; Update: Partial<Milestone>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

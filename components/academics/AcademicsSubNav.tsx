@@ -4,24 +4,48 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const LIVE_TABS = [
+// One ordered list, live tabs carry a path, not-yet-built ones carry null —
+// keeps visual order stable as tabs go live one at a time (rather than two
+// separate "live" / "placeholder" groups re-sorting each other around).
+const TABS: { path: string | null; label: string }[] = [
   { path: "", label: "Overview" },
   { path: "/standing", label: "Academic Standing" },
-] as const;
+  { path: null, label: "Planner" },
+  { path: null, label: "Courses" },
+  { path: null, label: "Assignments" },
+  { path: "/graduate-law-school", label: "Graduate & Law School" },
+  { path: null, label: "Documents" },
+];
 
-// Sketches where Academics is headed — not yet built, so these render as
-// visible but inert rather than linking to dead pages. Each becomes a real
-// tab as its own roadmap item ships (Graduate & Law School is next).
-const PLACEHOLDER_TABS = ["Planner", "Courses", "Assignments", "Graduate & Law School", "Documents"];
-
-export function AcademicsSubNav({ basePath }: { basePath: string }) {
+export function AcademicsSubNav({
+  basePath,
+  includeGraduateLawSchool = true,
+}: {
+  basePath: string;
+  // Graduate & Law School is private-only (LSAT scores, school-by-school
+  // application status) — the Portfolio Preview shell renders this tab as
+  // inert instead of linking to a route that doesn't exist there.
+  includeGraduateLawSchool?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
     <nav className="flex items-center gap-1 overflow-x-auto border-b border-border-subtle bg-surface-raised/60 px-4 md:px-8">
-      {LIVE_TABS.map(({ path, label }) => {
+      {TABS.map((tab) => {
+        const path = tab.path === "/graduate-law-school" && !includeGraduateLawSchool ? null : tab.path;
+        const label = tab.label;
+        if (path === null) {
+          return (
+            <span
+              key={label}
+              className="shrink-0 cursor-default whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-sm text-ink-tertiary/40"
+            >
+              {label}
+            </span>
+          );
+        }
         const href = `${basePath}${path}`;
-        const isActive = pathname === href;
+        const isActive = pathname === href || (path === "/graduate-law-school" && pathname.startsWith(`${href}/`));
         return (
           <Link
             key={label}
@@ -37,14 +61,6 @@ export function AcademicsSubNav({ basePath }: { basePath: string }) {
           </Link>
         );
       })}
-      {PLACEHOLDER_TABS.map((label) => (
-        <span
-          key={label}
-          className="shrink-0 cursor-default whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-sm text-ink-tertiary/40"
-        >
-          {label}
-        </span>
-      ))}
     </nav>
   );
 }
