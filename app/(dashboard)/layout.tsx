@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { MobileTopBar } from "@/components/layout/MobileTopBar";
+import { MobileSignOutButton } from "@/components/layout/MobileSignOutButton";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -22,7 +25,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex">
       <Sidebar user={profile} />
-      <main className="min-h-screen flex-1 overflow-y-auto bg-background">{children}</main>
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <MobileTopBar right={<MobileSignOutButton />} />
+        <main className="flex-1 overflow-y-auto bg-background pb-16 md:pb-0">{children}</main>
+      </div>
+      <MobileNav />
     </div>
   );
 }

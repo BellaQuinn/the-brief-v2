@@ -19,10 +19,10 @@ export function WorkspaceHeader({ eyebrow, title, subtitle, action }: WorkspaceH
         <span className="h-2 w-2 rounded-full bg-seal/70" />
         <span className="h-2 w-2 rounded-full bg-status-onTrack/70" />
       </div>
-      <div className="flex items-start justify-between px-8 py-6">
+      <div className="flex items-start justify-between px-4 py-6 md:px-8">
         <div>
           <p className="eyebrow mb-2">{`$ ${eyebrow}`}</p>
-          <h1 className="font-display text-2xl font-medium text-ink-primary">
+          <h1 className="font-display text-xl font-medium text-ink-primary md:text-2xl">
             {title}
             <span className="ml-1 inline-block animate-pulse-signal">_</span>
           </h1>

@@ -74,7 +74,7 @@ export function DegreeForm({ degree, onSaved, onCancel }: DegreeFormProps) {
         onChange={(e) => setDegreeName(e.target.value)}
       />
       <Input label="Major" value={major} onChange={(e) => setMajor(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Total credits"
           type="number"
@@ -90,7 +90,7 @@ export function DegreeForm({ degree, onSaved, onCancel }: DegreeFormProps) {
           onChange={(e) => setCompletedCredits(e.target.value)}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Expected graduation"
           type="date"

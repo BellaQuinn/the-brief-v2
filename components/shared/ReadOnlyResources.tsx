@@ -30,7 +30,7 @@ export function ReadOnlyResources({ resources }: { resources: Resource[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {resources.map((resource) => {
         const Icon = CATEGORY_ICON[resource.category];
         return (

@@ -17,7 +17,7 @@ export function ReviewSidebar({ token }: { token: string }) {
   ] as const;
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
+    <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-surface md:flex">
       <div className="flex items-center gap-2.5 px-5 py-6">
         <div className="flex h-7 w-7 items-center justify-center rounded-full border border-seal/40 text-seal">
           <span className="font-display text-xs font-semibold">B</span>

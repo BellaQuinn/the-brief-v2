@@ -51,13 +51,13 @@ export function DegreeSummary({
 
   return (
     <div className="rounded-card border border-border bg-surface p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="eyebrow mb-1">{degree.school_name}</p>
-          <h2 className="font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
-          {degree.major && <p className="mt-0.5 text-sm text-ink-secondary">{degree.major}</p>}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="eyebrow mb-1 truncate">{degree.school_name}</p>
+          <h2 className="truncate font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
+          {degree.major && <p className="mt-0.5 truncate text-sm text-ink-secondary">{degree.major}</p>}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <span
             className={cn(
               "rounded-full border px-2.5 py-0.5 text-xs",
@@ -79,7 +79,7 @@ export function DegreeSummary({
       </div>
 
       <div className="mt-5">
-        <div className="mb-1.5 flex items-center justify-between text-xs text-ink-secondary">
+        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-xs text-ink-secondary">
           <span>
             {degree.completed_credits} / {degree.total_credits ?? "—"} credits
           </span>

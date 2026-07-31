@@ -59,7 +59,7 @@ export function AssignmentRow({
         <p className="mt-0.5 font-mono text-[11px] text-ink-tertiary">{STATUS_LABEL[assignment.status]}</p>
       </div>
       {assignment.points_possible != null && (
-        <span className="shrink-0 font-mono text-xs text-ink-tertiary">
+        <span className="hidden shrink-0 font-mono text-xs text-ink-tertiary sm:inline">
           {assignment.points_earned ?? "—"}/{assignment.points_possible}
         </span>
       )}

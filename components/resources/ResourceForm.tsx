@@ -64,7 +64,7 @@ export function ResourceForm({ resource, onSaved, onCancel }: ResourceFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Category"
           value={category}

@@ -48,7 +48,7 @@ export function ResourcesClient({ initialResources }: { initialResources: Resour
         subtitle={`${resources.length} saved`}
       />
 
-      <div className="px-8 py-6">
+      <div className="px-4 py-6 md:px-8">
         <div className="mb-4 flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-tertiary" />
@@ -92,7 +92,7 @@ export function ResourcesClient({ initialResources }: { initialResources: Resour
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {filtered.map((r) => (
               <ResourceCard
                 key={r.id}

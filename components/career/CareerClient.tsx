@@ -49,7 +49,7 @@ export function CareerClient({
         subtitle={`${certifications.length} certifications · ${applications.length} applications · ${networking.length} contacts`}
       />
 
-      <div className="space-y-8 px-8 py-6">
+      <div className="space-y-8 px-4 py-6 md:px-8">
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-medium text-ink-primary">Certifications</h2>
@@ -66,7 +66,7 @@ export function CareerClient({
               <p className="text-sm text-ink-secondary">No certifications tracked yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {certifications.map((c) => (
                 <CertificationCard
                   key={c.id}

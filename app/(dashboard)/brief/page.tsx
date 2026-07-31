@@ -46,7 +46,7 @@ export default async function BriefPage() {
         title="What deserves your attention today"
       />
 
-      <div className="grid grid-cols-3 gap-4 px-8 pt-6">
+      <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-3 md:px-8">
         <StatTile
           label="Due today"
           value={String(today.length)}
@@ -56,12 +56,12 @@ export default async function BriefPage() {
         <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} />
       </div>
 
-      <section className="px-8 pt-8">
+      <section className="px-4 pt-8 md:px-8">
         <h2 className="mb-3 text-sm font-medium text-ink-primary">Today&apos;s focus</h2>
         <FocusList items={today} />
       </section>
 
-      <section className="px-8 pb-8 pt-8">
+      <section className="px-4 pb-8 pt-8 md:px-8">
         <h2 className="mb-3 text-sm font-medium text-ink-primary">On the horizon — next 7 days</h2>
         <FocusList items={upcoming} />
       </section>

@@ -31,7 +31,7 @@ export default async function ReviewCareerPage() {
   return (
     <div>
       <WorkspaceHeader eyebrow="PORTFOLIO PREVIEW // CAREER" title="Career" />
-      <div className="space-y-8 px-8 py-6">
+      <div className="space-y-8 px-4 py-6 md:px-8">
         <ReadOnlyCertificationsList certifications={(certifications as Certification[]) ?? []} />
         <section>
           <h2 className="mb-3 text-sm font-medium text-ink-primary">Job applications</h2>

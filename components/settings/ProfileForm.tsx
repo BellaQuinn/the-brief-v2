@@ -62,7 +62,7 @@ export function ProfileForm({
         <p className="text-xs text-ink-tertiary">{profile.email}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <Input label="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
       </div>

@@ -19,7 +19,7 @@ export default async function SettingsPage() {
   return (
     <div>
       <WorkspaceHeader eyebrow="SETTINGS" title="Settings" />
-      <div className="space-y-6 px-8 py-6">
+      <div className="space-y-6 px-4 py-6 md:px-8">
         <ProfileForm profile={profile!} />
         <PasswordForm />
       </div>

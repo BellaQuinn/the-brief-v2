@@ -58,12 +58,12 @@ export function NetworkingForm({ contact, onSaved, onCancel }: NetworkingFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Company" value={company} onChange={(e) => setCompany(e.target.value)} />
         <Input label="Role" value={role} onChange={(e) => setRole(e.target.value)} />
       </div>
       <Input label="LinkedIn" placeholder="linkedin.com/in/..." value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Last contact" type="date" value={lastContact} onChange={(e) => setLastContact(e.target.value)} />
         <Input label="Next follow-up" type="date" value={nextFollowUp} onChange={(e) => setNextFollowUp(e.target.value)} />
       </div>

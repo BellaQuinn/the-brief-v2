@@ -69,7 +69,7 @@ export function CourseForm({ termId, course, onSaved, onCancel }: CourseFormProp
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Course code" placeholder="CYBR 320" value={courseCode} onChange={(e) => setCourseCode(e.target.value)} />
         <Input label="Credits" type="number" min={0} value={credits} onChange={(e) => setCredits(e.target.value)} />
       </div>
@@ -79,7 +79,7 @@ export function CourseForm({ termId, course, onSaved, onCancel }: CourseFormProp
         value={courseName}
         onChange={(e) => setCourseName(e.target.value)}
       />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Professor" value={professor} onChange={(e) => setProfessor(e.target.value)} />
         <Select
           label="Delivery mode"

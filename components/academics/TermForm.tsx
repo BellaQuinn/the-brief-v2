@@ -56,7 +56,7 @@ export function TermForm({ degreeId, term, onSaved, onCancel }: TermFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input label="Term name" required placeholder="Fall 2026 – 7A" value={name} onChange={(e) => setName(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Start date" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
         <Input label="End date" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </div>

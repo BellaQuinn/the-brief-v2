@@ -125,7 +125,7 @@ export function AcademicsClient({ initialDegree }: { initialDegree: DegreeWithTe
         subtitle={degree ? `${degree.terms.length} terms tracked` : "Set up your degree to get started"}
       />
 
-      <div className="space-y-6 px-8 py-6">
+      <div className="space-y-6 px-4 py-6 md:px-8">
         <DegreeSummary
           degree={degree}
           onSaved={(d) => setDegree((prev) => (prev ? { ...prev, ...d } : { ...d, terms: [] }))}

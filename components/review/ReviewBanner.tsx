@@ -16,7 +16,7 @@ export function ReviewBanner() {
           transition={{ duration: 0.25, ease: "easeInOut" }}
           className="overflow-hidden border-b border-border-subtle bg-surface-raised"
         >
-          <div className="flex items-start justify-between gap-4 px-8 py-3">
+          <div className="flex items-start justify-between gap-4 px-4 py-3 md:px-8">
             <p className="text-xs leading-relaxed text-ink-secondary">
               <span className="font-display font-medium text-ink-primary">The Brief</span>
               <span className="mx-1.5 text-ink-tertiary">·</span>

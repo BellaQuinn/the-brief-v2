@@ -48,32 +48,39 @@ export function TermSection({ term, actions }: { term: TermWithCourses; actions:
 
   return (
     <div className="rounded-card border border-border bg-surface">
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-center gap-2 px-4 py-3 sm:gap-3">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="flex flex-1 items-center gap-3 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-3"
           aria-expanded={open}
         >
-          <ChevronDown className={cn("h-4 w-4 text-ink-tertiary transition-transform", !open && "-rotate-90")} />
-          <span className="text-sm font-medium text-ink-primary">{term.name}</span>
-          <span className={cn("rounded-full border px-2 py-0.5 text-[11px]", STATUS_STYLE[term.status])}>
+          <ChevronDown
+            className={cn("h-4 w-4 shrink-0 text-ink-tertiary transition-transform", !open && "-rotate-90")}
+          />
+          <span className="truncate text-sm font-medium text-ink-primary">{term.name}</span>
+          <span
+            className={cn(
+              "shrink-0 rounded-full border px-2 py-0.5 text-[11px]",
+              STATUS_STYLE[term.status]
+            )}
+          >
             {STATUS_LABEL[term.status]}
           </span>
-          <span className="font-mono text-xs text-ink-tertiary">
+          <span className="hidden shrink-0 font-mono text-xs text-ink-tertiary sm:inline">
             {term.courses.length} course{term.courses.length === 1 ? "" : "s"} · {totalCredits} cr
           </span>
         </button>
         <button
           onClick={() => setEditing(true)}
           aria-label="Edit term"
-          className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
+          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={handleDelete}
           aria-label="Delete term"
-          className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
+          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>

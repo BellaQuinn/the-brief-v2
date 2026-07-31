@@ -71,15 +71,15 @@ export function ApplicationForm({ application, defaultStatus, onSaved, onCancel 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Company" required value={company} onChange={(e) => setCompany(e.target.value)} />
         <Input label="Position" required value={position} onChange={(e) => setPosition(e.target.value)} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Salary" placeholder="$85k–$95k" value={salary} onChange={(e) => setSalary(e.target.value)} />
         <Input label="Location" value={location} onChange={(e) => setLocation(e.target.value)} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Status"
           value={status}

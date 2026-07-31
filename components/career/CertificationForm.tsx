@@ -67,7 +67,7 @@ export function CertificationForm({ certification, onSaved, onCancel }: Certific
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input label="Certification name" required value={name} onChange={(e) => setName(e.target.value)} />
       <Input label="Provider" placeholder="CompTIA, (ISC)², etc." value={provider} onChange={(e) => setProvider(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Status"
           value={status}
@@ -83,7 +83,7 @@ export function CertificationForm({ certification, onSaved, onCancel }: Certific
           onChange={(e) => setProgress(e.target.value)}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Exam date" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
         <Input
           label="Expiration date"

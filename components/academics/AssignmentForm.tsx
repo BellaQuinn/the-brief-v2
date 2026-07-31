@@ -88,11 +88,11 @@ export function AssignmentForm({ courseId, assignment, onSaved, onCancel }: Assi
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select label="Type" value={type} onChange={(e) => setType(e.target.value as AssignmentType)} options={TYPE_OPTIONS} />
         <Input label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select
           label="Status"
           value={status}
@@ -106,7 +106,7 @@ export function AssignmentForm({ courseId, assignment, onSaved, onCancel }: Assi
           options={PRIORITY_OPTIONS}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Points possible"
           type="number"

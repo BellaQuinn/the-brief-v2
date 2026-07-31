@@ -73,13 +73,19 @@ export function CourseRow({
 
   return (
     <div className="rounded-lg border border-border-subtle bg-surface-raised">
-      <div className="flex items-center gap-3 px-3 py-2.5">
-        <button onClick={handleToggle} className="flex flex-1 items-center gap-2.5 text-left" aria-expanded={open}>
+      <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-3">
+        <button
+          onClick={handleToggle}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-2.5"
+          aria-expanded={open}
+        >
           <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-ink-tertiary transition-transform", !open && "-rotate-90")} />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               {course.course_code && (
-                <span className="font-mono text-xs text-ink-tertiary">{course.course_code}</span>
+                <span className="hidden shrink-0 font-mono text-xs text-ink-tertiary sm:inline">
+                  {course.course_code}
+                </span>
               )}
               <span className="truncate text-sm text-ink-primary">{course.course_name}</span>
             </div>
@@ -89,20 +95,22 @@ export function CourseRow({
             {STATUS_LABEL[course.status]}
           </span>
           {course.credits != null && (
-            <span className="shrink-0 font-mono text-xs text-ink-tertiary">{course.credits} cr</span>
+            <span className="hidden shrink-0 font-mono text-xs text-ink-tertiary sm:inline">
+              {course.credits} cr
+            </span>
           )}
         </button>
         <button
           onClick={() => setEditing(true)}
           aria-label="Edit course"
-          className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-overlay hover:text-ink-primary"
+          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-overlay hover:text-ink-primary"
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={handleDelete}
           aria-label="Delete course"
-          className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
+          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
