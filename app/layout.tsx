@@ -31,6 +31,13 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "The Brief",
   },
+  other: {
+    // Next's `appleWebApp.capable` doesn't reliably emit this tag --
+    // set it directly, since it's the one iOS actually checks to decide
+    // "installed app" (own standalone window) vs. "bookmark" (opens in
+    // the system default browser).
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
