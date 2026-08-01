@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "The Brief — Mission Control for ambitious nontraditional students",
   description:
     "The Brief reduces the cognitive load of balancing school, work, certifications, and career advancement into one daily briefing.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    // iOS only receives Web Push once the site is added to the Home
+    // Screen (iOS 16.4+) — a plain Safari tab can't. This is what makes
+    // that possible; it doesn't do anything on its own.
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "The Brief",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

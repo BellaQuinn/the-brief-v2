@@ -272,6 +272,28 @@ export interface Milestone {
   updated_at: string;
 }
 
+// Named `*Record`, not `PushSubscription` — that name is already the
+// browser's native Push API type (lib/pushClient.ts deals in those
+// directly), and reusing it here for the database row would collide.
+export interface PushSubscriptionRecord {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationLogEntry {
+  id: string;
+  user_id: string;
+  source_type: string;
+  source_id: string;
+  window: string;
+  sent_at: string;
+}
+
 // ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
@@ -362,6 +384,18 @@ export interface Database {
         Relationships: [];
       };
       milestones: { Row: Milestone; Insert: Partial<Milestone>; Update: Partial<Milestone>; Relationships: [] };
+      push_subscriptions: {
+        Row: PushSubscriptionRecord;
+        Insert: Partial<PushSubscriptionRecord>;
+        Update: Partial<PushSubscriptionRecord>;
+        Relationships: [];
+      };
+      notification_log: {
+        Row: NotificationLogEntry;
+        Insert: Partial<NotificationLogEntry>;
+        Update: Partial<NotificationLogEntry>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

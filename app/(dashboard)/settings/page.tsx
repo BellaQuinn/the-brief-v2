@@ -3,6 +3,7 @@ import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
+import { NotificationsForm } from "@/components/settings/NotificationsForm";
 import { buildSettingsWorkspaceBrief } from "@/lib/workspaceBriefs";
 
 export default async function SettingsPage() {
@@ -37,6 +38,9 @@ export default async function SettingsPage() {
         </WorkspaceSection>
         <WorkspaceSection eyebrow="Security protocol" title="Credential rotation">
           <PasswordForm />
+        </WorkspaceSection>
+        <WorkspaceSection eyebrow="Reminders" title="Push notifications">
+          <NotificationsForm />
         </WorkspaceSection>
       </div>
     </div>
