@@ -78,7 +78,7 @@ export async function GET(request: Request) {
     const reminders = computeDueReminders(events, now, timezone);
 
     const alreadySent = new Set(
-      ((log as NotificationLogEntry[]) ?? []).map((l) => `${l.source_type}:${l.source_id}:${l.window}`)
+      ((log as NotificationLogEntry[]) ?? []).map((l) => `${l.source_type}:${l.source_id}:${l.reminder_window}`)
     );
     const toSend = reminders.filter((r) => !alreadySent.has(`${r.sourceType}:${r.sourceId}:${r.window}`));
     if (toSend.length === 0) continue;
@@ -110,7 +110,7 @@ export async function GET(request: Request) {
           user_id: userId,
           source_type: reminder.sourceType,
           source_id: reminder.sourceId,
-          window: reminder.window,
+          reminder_window: reminder.window,
         });
         notificationsSent++;
       }

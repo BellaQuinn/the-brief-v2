@@ -31,9 +31,11 @@ create table public.notification_log (
   source_type text not null,
   source_id uuid not null,
   -- "3_days" | "1_day" | "day_of"
-  window text not null,
+  -- Named `reminder_window`, not `window` -- `window` is a reserved word
+  -- in Postgres (window functions) and errors as a bare column name.
+  reminder_window text not null,
   sent_at timestamptz not null default now(),
-  unique (user_id, source_type, source_id, window)
+  unique (user_id, source_type, source_id, reminder_window)
 );
 create index notification_log_user_id_idx on public.notification_log(user_id);
 

@@ -290,7 +290,7 @@ export interface NotificationLogEntry {
   user_id: string;
   source_type: string;
   source_id: string;
-  window: string;
+  reminder_window: string;
   sent_at: string;
 }
 
