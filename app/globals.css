@@ -58,9 +58,13 @@
      simply has more room for it to breathe. */
   .workspace-header-treatment {
     background-color: theme("colors.background");
-    background-image:
-      radial-gradient(ellipse at 92% 0%, rgba(59, 130, 246, 0.2), transparent 58%),
-      linear-gradient(112deg, rgba(16, 185, 129, 0.075), transparent 48%);
+    background-image: linear-gradient(
+      108deg,
+      rgba(16, 185, 129, 0.15) 0%,
+      rgba(16, 185, 129, 0.075) 34%,
+      rgba(59, 130, 246, 0.09) 68%,
+      rgba(59, 130, 246, 0.18) 100%
+    );
   }
 
   /* The Brief is the product's green-led Mission Control surface. Its
