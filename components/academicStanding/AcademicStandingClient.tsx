@@ -1,4 +1,5 @@
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
+import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { GpaOverview } from "@/components/academicStanding/GpaOverview";
 import { CoursePerformanceList } from "@/components/academicStanding/CoursePerformanceList";
 import { HonorsProgress } from "@/components/academicStanding/HonorsProgress";
@@ -12,6 +13,7 @@ import type {
   HonorsListStatusEntry,
   TermGpaResult,
 } from "@/lib/academicStanding/types";
+import { buildAcademicStandingWorkspaceBrief } from "@/lib/workspaceBriefs";
 
 // No interactivity here — everything is server-computed and passed down,
 // so this stays a plain (server) component rather than "use client".
@@ -32,35 +34,40 @@ export function AcademicStandingClient({
   graduationForecast: GraduationHonorsForecast;
   honorSocietyProgress: HonorSocietyProgressResult[];
 }) {
+  const inProgressCount = courses.filter(({ grade }) => grade.isProvisional).length;
+  const brief = buildAcademicStandingWorkspaceBrief({
+    cumulativeGpa: cumulativeGpa.gpa,
+    termGpa: termGpa?.gpa ?? null,
+    completedCredits: cumulativeGpa.basis.completedCredits,
+    inProgressCourseCount: inProgressCount,
+  });
+
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow={eyebrow}
-        title="Academic Standing"
-        hideDots
-        subtitle="Academic Standing automatically calculates your GPA, honors, and academic progress from your coursework. No manual GPA tracking required."
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${cumulativeGpa.basis.completedCredits} completed credits`}
       />
 
-      <div className="space-y-8 px-4 py-6 md:px-8">
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">GPA Overview</h2>
+      <div className="space-y-10 px-4 py-7 md:px-8 md:py-8">
+        <WorkspaceSection eyebrow="Standing signal" title="GPA position">
           <GpaOverview termGpa={termGpa} cumulativeGpa={cumulativeGpa} />
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Course Performance</h2>
+        <WorkspaceSection eyebrow="Active evidence" title="Course performance">
           <CoursePerformanceList courses={courses} />
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Honors Progress</h2>
+        <WorkspaceSection eyebrow="Recognition thresholds" title="Honors progress">
           <HonorsProgress statuses={honorsStatuses} graduationForecast={graduationForecast} />
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Honor Society</h2>
+        <WorkspaceSection eyebrow="Eligibility matrix" title="Honor society">
           <HonorSocietyProgress progress={honorSocietyProgress} />
-        </section>
+        </WorkspaceSection>
       </div>
     </div>
   );

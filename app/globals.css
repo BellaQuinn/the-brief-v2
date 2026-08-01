@@ -95,6 +95,67 @@
       bottom right;
     background-repeat: no-repeat;
   }
+
+  /* The shared quantitative canvas. Pages plot different facts inside it,
+     but the field itself never changes: open sides, a faint measurement
+     grid, and one short status-colored calibration line. */
+  .signal-field {
+    --field-accent: theme("colors.signal.DEFAULT");
+    position: relative;
+    border-top: 1px solid theme("colors.border.subtle");
+    border-bottom: 1px solid theme("colors.border.subtle");
+    background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+  }
+  .signal-field::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 64px;
+    height: 1px;
+    background: var(--field-accent);
+  }
+  .signal-field-accent {
+    --field-accent: theme("colors.accent.DEFAULT");
+  }
+
+  /* One shared branching language for courses, evidence, honors, and
+     requirements. A trace is deliberately open: the rail owns hierarchy;
+     individual records never need their own box. */
+  .trace-rail {
+    position: relative;
+  }
+  .trace-rail::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    bottom: 16px;
+    width: 1px;
+    background: linear-gradient(to bottom, theme("colors.accent.DEFAULT"), theme("colors.border.strong"), transparent);
+    opacity: 0.65;
+  }
+  .trace-node {
+    position: absolute;
+    left: 9px;
+    top: 1.5rem;
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    border: 1px solid theme("colors.accent.DEFAULT");
+    background: theme("colors.background");
+  }
+  .trace-connector {
+    position: absolute;
+    left: 13px;
+    top: calc(1.5rem + 3px);
+    width: 16px;
+    height: 1px;
+    background: theme("colors.border.strong");
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

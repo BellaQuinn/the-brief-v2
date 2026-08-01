@@ -12,10 +12,10 @@ import type { AcademicsActions } from "@/components/academics/AcademicsClient";
 import type { Assignment, CourseWithAssignments } from "@/types/database.types";
 
 const STATUS_STYLE: Record<CourseWithAssignments["status"], string> = {
-  in_progress: "border-signal/40 text-signal",
-  planned: "border-border-strong text-ink-tertiary",
-  completed: "border-status-onTrack/40 text-status-onTrack",
-  withdrawn: "border-status-atRisk/40 text-status-atRisk",
+  in_progress: "text-signal",
+  planned: "text-ink-tertiary",
+  completed: "text-status-onTrack",
+  withdrawn: "text-status-atRisk",
 };
 
 const STATUS_LABEL: Record<CourseWithAssignments["status"], string> = {
@@ -27,10 +27,12 @@ const STATUS_LABEL: Record<CourseWithAssignments["status"], string> = {
 
 export function CourseRow({
   course,
+  courseIndex,
   termId,
   actions,
 }: {
   course: CourseWithAssignments;
+  courseIndex: number;
   termId: string;
   actions: AcademicsActions;
 }) {
@@ -72,8 +74,13 @@ export function CourseRow({
   }
 
   return (
-    <div className="rounded-lg border border-border-subtle bg-surface-raised">
-      <div className="flex items-center gap-2 px-3 py-2.5 sm:gap-3">
+    <article className="group/course relative py-1">
+      <span aria-hidden className="absolute -left-7 top-7 hidden h-px w-7 bg-border-strong md:block" />
+      <span aria-hidden className="absolute -left-[30px] top-[25px] hidden h-1.5 w-1.5 rotate-45 border border-accent/60 bg-background md:block" />
+      <div className="flex items-center gap-2 py-3 sm:gap-3">
+        <span className="flex h-5 w-6 shrink-0 items-center justify-center font-mono text-[8px] text-accent/80">
+          {String(courseIndex).padStart(2, "0")}
+        </span>
         <button
           onClick={handleToggle}
           className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-2.5"
@@ -87,11 +94,13 @@ export function CourseRow({
                   {course.course_code}
                 </span>
               )}
-              <span className="truncate text-sm text-ink-primary">{course.course_name}</span>
+              <span className="truncate text-sm text-ink-primary transition-colors group-hover/course:text-white">
+                {course.course_name}
+              </span>
             </div>
             {course.notes && <p className="mt-0.5 truncate text-xs text-ink-tertiary">{course.notes}</p>}
           </div>
-          <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[11px]", STATUS_STYLE[course.status])}>
+          <span className={cn("hidden shrink-0 font-mono text-[9px] uppercase tracking-wide sm:inline", STATUS_STYLE[course.status])}>
             {STATUS_LABEL[course.status]}
           </span>
           {course.credits != null && (
@@ -117,11 +126,12 @@ export function CourseRow({
       </div>
 
       {open && (
-        <div className="border-t border-border-subtle px-3 py-2.5">
+        <div className="relative ml-9 py-2 pl-5">
+          <span aria-hidden className="absolute bottom-2 left-0 top-0 w-px bg-gradient-to-b from-accent/45 via-border-strong to-transparent" />
           {loadingAssignments ? (
             <p className="px-1 py-1 text-xs text-ink-tertiary">Loading assignments…</p>
           ) : course.assignments && course.assignments.length > 0 ? (
-            <div className="space-y-1.5">
+            <div>
               {course.assignments.map((a) => (
                 <AssignmentRow key={a.id} assignment={a} courseId={course.id} actions={actions} />
               ))}
@@ -131,7 +141,7 @@ export function CourseRow({
           )}
           <button
             onClick={() => setAddingAssignment(true)}
-            className="mt-2 flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
+            className="mt-2 flex items-center gap-1.5 text-xs text-accent hover:text-accent-bright"
           >
             <Plus className="h-3 w-3" />
             Add assignment
@@ -161,6 +171,6 @@ export function CourseRow({
           onCancel={() => setAddingAssignment(false)}
         />
       </Modal>
-    </div>
+    </article>
   );
 }

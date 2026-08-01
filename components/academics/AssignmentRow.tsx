@@ -52,8 +52,9 @@ export function AssignmentRow({
   }
 
   return (
-    <div className="flex items-center gap-2.5 rounded-md bg-surface-overlay px-2.5 py-2">
-      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[assignment.priority])} aria-hidden />
+    <div className="group relative flex items-center gap-2.5 py-2.5">
+      <span aria-hidden className="absolute -left-5 top-1/2 h-px w-4 bg-border-strong" />
+      <span className={cn("h-1.5 w-1.5 shrink-0 rotate-45", PRIORITY_DOT[assignment.priority])} aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-ink-primary">{assignment.title}</p>
         <p className="mt-0.5 font-mono text-[11px] text-ink-tertiary">{STATUS_LABEL[assignment.status]}</p>
@@ -71,14 +72,14 @@ export function AssignmentRow({
       <button
         onClick={() => setEditing(true)}
         aria-label="Edit assignment"
-        className="rounded-md p-1 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
+        className="rounded-md p-1 text-ink-tertiary opacity-70 transition-all hover:bg-surface-raised hover:text-ink-primary group-hover:opacity-100 group-focus-within:opacity-100"
       >
         <Pencil className="h-3 w-3" />
       </button>
       <button
         onClick={handleDelete}
         aria-label="Delete assignment"
-        className="rounded-md p-1 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
+        className="rounded-md p-1 text-ink-tertiary opacity-70 transition-all hover:bg-status-atRisk/10 hover:text-status-atRisk group-hover:opacity-100 group-focus-within:opacity-100"
       >
         <Trash2 className="h-3 w-3" />
       </button>

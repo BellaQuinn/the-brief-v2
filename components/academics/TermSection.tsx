@@ -13,9 +13,9 @@ import type { AcademicsActions } from "@/components/academics/AcademicsClient";
 import type { Term, TermWithCourses } from "@/types/database.types";
 
 const STATUS_STYLE: Record<Term["status"], string> = {
-  active: "border-signal/40 text-signal",
-  upcoming: "border-border-strong text-ink-tertiary",
-  completed: "border-status-onTrack/40 text-status-onTrack",
+  active: "bg-signal text-background",
+  upcoming: "bg-ink-tertiary text-background",
+  completed: "bg-status-onTrack text-background",
 };
 
 const STATUS_LABEL: Record<Term["status"], string> = {
@@ -47,59 +47,75 @@ export function TermSection({ term, actions }: { term: TermWithCourses; actions:
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface">
-      <div className="flex items-center gap-2 px-4 py-3 sm:gap-3">
+    <section className="relative grid border-b border-border-subtle last:border-b-0 md:grid-cols-[180px_minmax(0,1fr)]">
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -left-5 top-7 h-2 w-2 -translate-x-1/2 rotate-45 border bg-background md:-left-9",
+          term.status === "active"
+            ? "border-signal bg-signal shadow-[0_0_8px_rgba(16,185,129,0.7)]"
+            : term.status === "completed"
+              ? "border-status-onTrack/50"
+              : "border-border-strong"
+        )}
+      />
+      <div className="flex items-start gap-2 py-6 pr-1 sm:gap-3 md:pr-6">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left sm:gap-3"
+          className="flex min-w-0 flex-1 items-start gap-2 text-left"
           aria-expanded={open}
         >
           <ChevronDown
             className={cn("h-4 w-4 shrink-0 text-ink-tertiary transition-transform", !open && "-rotate-90")}
           />
-          <span className="truncate text-sm font-medium text-ink-primary">{term.name}</span>
-          <span
-            className={cn(
-              "shrink-0 rounded-full border px-2 py-0.5 text-[11px]",
-              STATUS_STYLE[term.status]
-            )}
+          <div>
+            <span className="block text-sm font-medium text-ink-primary">{term.name}</span>
+            <span className={cn("mt-2 inline-block px-2 py-0.5 font-mono text-[8px] uppercase tracking-wide", STATUS_STYLE[term.status])}>
+              {STATUS_LABEL[term.status]}
+            </span>
+            <span className="mt-2 block font-mono text-[9px] uppercase tracking-wide text-ink-tertiary">
+              {term.courses.length} course{term.courses.length === 1 ? "" : "s"} / {totalCredits} cr
+            </span>
+          </div>
+        </button>
+        <div className="flex shrink-0 flex-col gap-1">
+          <button
+            onClick={() => setEditing(true)}
+            aria-label="Edit term"
+            className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
           >
-            {STATUS_LABEL[term.status]}
-          </span>
-          <span className="hidden shrink-0 font-mono text-xs text-ink-tertiary sm:inline">
-            {term.courses.length} course{term.courses.length === 1 ? "" : "s"} · {totalCredits} cr
-          </span>
-        </button>
-        <button
-          onClick={() => setEditing(true)}
-          aria-label="Edit term"
-          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-surface-raised hover:text-ink-primary"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-        <button
-          onClick={handleDelete}
-          aria-label="Delete term"
-          className="shrink-0 rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={handleDelete}
+            aria-label="Delete term"
+            className="rounded-md p-1.5 text-ink-tertiary transition-colors hover:bg-status-atRisk/10 hover:text-status-atRisk"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       {open && (
-        <div className="border-t border-border-subtle px-4 py-3">
+        <div className="border-t border-border-subtle pb-5 pt-2 md:border-l md:border-t-0 md:pl-7">
           {term.courses.length === 0 ? (
             <p className="px-1 py-2 text-sm text-ink-tertiary">No courses in this term yet.</p>
           ) : (
-            <div className="space-y-2">
-              {term.courses.map((course) => (
-                <CourseRow key={course.id} course={course} termId={term.id} actions={actions} />
+            <div className="py-1">
+              {term.courses.map((course, index) => (
+                <CourseRow
+                  key={course.id}
+                  course={course}
+                  courseIndex={index + 1}
+                  termId={term.id}
+                  actions={actions}
+                />
               ))}
             </div>
           )}
           <button
             onClick={() => setAddingCourse(true)}
-            className="mt-3 flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
+            className="mt-3 flex items-center gap-1.5 text-xs text-accent hover:text-accent-bright"
           >
             <Plus className="h-3.5 w-3.5" />
             Add course
@@ -129,6 +145,6 @@ export function TermSection({ term, actions }: { term: TermWithCourses; actions:
           onCancel={() => setAddingCourse(false)}
         />
       </Modal>
-    </div>
+    </section>
   );
 }
