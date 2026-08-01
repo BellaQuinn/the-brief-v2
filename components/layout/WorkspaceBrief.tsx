@@ -16,11 +16,7 @@ export function WorkspaceBrief({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="relative overflow-hidden border-b border-border-subtle px-4 py-7 md:px-8 md:py-8">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 -top-24 h-64 w-80 rounded-full bg-accent/[0.055] blur-3xl"
-      />
+    <header className="workspace-header-treatment relative overflow-hidden border-b border-border-subtle px-4 py-7 md:px-8 md:py-8">
       <div className="absolute left-4 top-0 h-0.5 w-12 bg-signal md:left-8" />
 
       <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">

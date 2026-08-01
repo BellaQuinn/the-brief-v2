@@ -49,7 +49,26 @@
      every section: mono, uppercase, wide tracking. Encodes "this is a
      classification/heading line," not decoration. */
   .eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-eyebrow text-ink-tertiary;
+    @apply font-mono text-[11px] uppercase tracking-eyebrow text-ink-secondary;
+  }
+
+  /* Shared workspace header atmosphere. This is a real background layer,
+     not an oversized decorative orb, so mobile cannot clip the brand color
+     away. The same blue/green mix is preserved at every breakpoint; desktop
+     simply has more room for it to breathe. */
+  .workspace-header-treatment {
+    background-color: theme("colors.background");
+    background-image:
+      radial-gradient(ellipse at 92% 0%, rgba(59, 130, 246, 0.2), transparent 58%),
+      linear-gradient(112deg, rgba(16, 185, 129, 0.075), transparent 48%);
+  }
+
+  @media (min-width: 768px) {
+    .workspace-header-treatment {
+      background-image:
+        radial-gradient(ellipse at 86% 5%, rgba(59, 130, 246, 0.15), transparent 52%),
+        linear-gradient(112deg, rgba(16, 185, 129, 0.055), transparent 42%);
+    }
   }
 
   /* Instrument frame — open corner-bracket marks instead of a full

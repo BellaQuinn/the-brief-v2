@@ -17,8 +17,9 @@ interface WorkspaceHeaderProps {
  */
 export function WorkspaceHeader({ eyebrow, title, subtitle, action }: WorkspaceHeaderProps) {
   return (
-    <div className="border-b border-border-subtle">
-      <div className="flex items-start justify-between gap-4 px-4 py-7 md:px-8 md:py-8">
+    <div className="workspace-header-treatment relative overflow-hidden border-b border-border-subtle">
+      <span aria-hidden className="absolute left-4 top-0 h-0.5 w-12 bg-signal md:left-8" />
+      <div className="relative flex items-start justify-between gap-4 px-4 py-7 md:px-8 md:py-8">
         <div className="min-w-0">
           <p className="eyebrow mb-2">{eyebrow}</p>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-ink-primary md:text-3xl">{title}</h1>
