@@ -63,6 +63,16 @@
       linear-gradient(112deg, rgba(16, 185, 129, 0.075), transparent 48%);
   }
 
+  /* The Brief is the product's green-led Mission Control surface. Its
+     mobile-only chrome must match the desktop identity instead of borrowing
+     the blue-led informational treatment used by secondary workspaces. */
+  .brief-header-treatment {
+    background-color: theme("colors.background");
+    background-image:
+      radial-gradient(ellipse at 88% 0%, rgba(16, 185, 129, 0.19), transparent 60%),
+      linear-gradient(112deg, rgba(16, 185, 129, 0.08), transparent 50%);
+  }
+
   @media (min-width: 768px) {
     .workspace-header-treatment {
       background-image:
