@@ -7,14 +7,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // `new Date("yyyy-MM-dd")` parses as UTC midnight, which can roll back a
-// day once formatted in a negative-UTC-offset timezone — use this for any
-// plain `date` column (deadlines, exam dates, etc.) instead.
-export function formatDateOnly(dateString: string): string {
+// day once compared or formatted in a negative-UTC-offset timezone. Use
+// this to get a local Date from any plain `date` column (deadlines, exam
+// dates, due dates, etc.) before formatting or diffing it.
+export function parseDateOnly(dateString: string): Date {
   const parts = dateString.split("-");
   const year = Number(parts[0]);
   const month = Number(parts[1]);
   const day = Number(parts[2]);
-  return new Date(year, month - 1, day).toLocaleDateString();
+  return new Date(year, month - 1, day);
+}
+
+export function formatDateOnly(dateString: string): string {
+  return parseDateOnly(dateString).toLocaleDateString();
 }
 
 const DEGREE_STATUS_RANK: Record<DegreeStatus, number> = {

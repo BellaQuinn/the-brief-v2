@@ -2,10 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import type { MissionBriefData } from "@/lib/missionBrief";
+import type { MomentumLabel } from "@/lib/momentum";
 
-const STEP_COUNT = 5;
 const STEP_DELAY_MS = 130;
+
+// Color follows the reading, not a fixed accent — "Losing ground"
+// styled in the same green as "Excellent" would misrepresent a bad
+// number as a good one.
+const MOMENTUM_COLOR: Record<MomentumLabel, string> = {
+  Excellent: "text-signal-bright",
+  Steady: "text-signal-bright",
+  Building: "text-ink-secondary",
+  "Losing ground": "text-status-atRisk",
+};
 
 // The "Briefing Compile" moment: each line resolves in sequence rather
 // than appearing all at once, so the brief reads as something being
@@ -15,19 +26,25 @@ export function MissionBrief({
   data,
   dayLabel,
   greeting,
+  momentum,
 }: {
   data: MissionBriefData;
   dayLabel: string;
   greeting: string;
+  // Null means there isn't enough recent data to say anything real —
+  // per the Design Philosophy, that's a reason to omit the line
+  // entirely, not to show a placeholder or an invented reading.
+  momentum: MomentumLabel | null;
 }) {
+  const stepCount = momentum ? 6 : 5;
   const reduceMotion = useReducedMotion();
-  const [step, setStep] = useState(reduceMotion ? STEP_COUNT : 0);
+  const [step, setStep] = useState(reduceMotion ? stepCount : 0);
 
   useEffect(() => {
-    if (reduceMotion || step >= STEP_COUNT) return;
+    if (reduceMotion || step >= stepCount) return;
     const timer = setTimeout(() => setStep((s) => s + 1), STEP_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [reduceMotion, step]);
+  }, [reduceMotion, step, stepCount]);
 
   return (
     <section className="relative">
@@ -63,6 +80,14 @@ export function MissionBrief({
             {data.directive}
           </p>
         </Reveal>
+
+        {momentum && (
+          <Reveal show={step > 5} className="mt-4 border-t border-border-subtle pt-3">
+            <p className="font-mono text-xs text-ink-tertiary">
+              Momentum — <span className={cn("font-semibold", MOMENTUM_COLOR[momentum])}>{momentum}</span>
+            </p>
+          </Reveal>
+        )}
       </div>
     </section>
   );

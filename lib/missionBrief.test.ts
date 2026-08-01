@@ -7,7 +7,7 @@ function makeAssignment(overrides: Partial<AssignmentWithContext> = {}): Assignm
     id: "a1",
     title: "Problem Set 4",
     priority: "medium",
-    due_date: "2026-08-03",
+    due_date: "2026-08-03T23:59:00.000Z",
     status: "not_started",
     course: { id: "c1", course_code: "CS-340", course_name: "Applied Algorithms" },
     ...overrides,
@@ -46,7 +46,7 @@ describe("buildMissionBrief", () => {
   });
 
   it("directs to the nearest upcoming item by title and weekday", () => {
-    const upcoming = [makeAssignment({ title: "Torts — Reading Ch. 6", due_date: "2026-08-03" })];
+    const upcoming = [makeAssignment({ title: "Torts — Reading Ch. 6", due_date: "2026-08-03T23:59:00.000Z" })];
     const brief = buildMissionBrief([], upcoming, 0, 0);
     expect(brief.directive).toBe("Get ahead on Torts — Reading Ch. 6 before Monday.");
   });

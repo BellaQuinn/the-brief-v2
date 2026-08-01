@@ -45,11 +45,14 @@ function buildDirective(
 ): string {
   const next = upcoming[0];
   if (next?.due_date) {
-    // Not `new Date(next.due_date)` — that parses "yyyy-MM-dd" as UTC
-    // midnight, which rolls back a day in negative-UTC-offset timezones
-    // (same gotcha documented in lib/utils.ts's formatDateOnly).
-    const [year, month, day] = next.due_date.split("-").map(Number);
-    const weekday = format(new Date(year!, month! - 1, day!), "EEEE");
+    // assignments.due_date is `timestamptz` (database/schema.sql), unlike
+    // the plain `date` columns elsewhere (exam_date, application_deadline)
+    // that need lib/utils.ts's parseDateOnly treatment — a timestamptz
+    // string already carries its own timezone, so plain `new Date()` is
+    // correct here and splitting it as if it were "yyyy-MM-dd" would
+    // silently break (caught via a schema check, not a failing test —
+    // the unit test fixture below used an unrealistic plain-date string).
+    const weekday = format(new Date(next.due_date), "EEEE");
     return `Get ahead on ${next.title} before ${weekday}.`;
   }
   if (openApplications > 0) {

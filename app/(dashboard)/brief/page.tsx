@@ -1,4 +1,4 @@
-import { addDays, endOfDay, format } from "date-fns";
+import { addDays, endOfDay, format, subDays } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { MissionBrief } from "@/components/brief/MissionBrief";
 import { FocusList } from "@/components/brief/FocusList";
@@ -11,7 +11,8 @@ import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/acade
 import { buildMissionBrief } from "@/lib/missionBrief";
 import { groupApplicationPipeline } from "@/lib/applicationPipeline";
 import { nextCertificationExam } from "@/lib/certifications";
-import type { Application, AssignmentWithContext, Certification } from "@/types/database.types";
+import { computeMomentum } from "@/lib/momentum";
+import type { Application, Assignment, AssignmentWithContext, Certification } from "@/types/database.types";
 
 function greeting(hour: number): string {
   if (hour < 12) return "Good morning";
@@ -58,24 +59,36 @@ export default async function BriefPage() {
   // Full rows, not just counts — the instrument row groups applications
   // into a real pipeline and reads the nearest certification exam date,
   // neither of which a head-count query can answer.
-  const [{ data: applications }, { data: certifications }, { data: activeDegree }] = await Promise.all([
-    supabase.from("applications").select("*").in("status", ["saved", "applied", "phone_screen", "interviewing", "offer"]),
-    supabase.from("certifications").select("*").in("status", ["studying", "scheduled"]),
-    // Same active-degree rule as the due-today query above — the GPA
-    // gauge reflects "am I on track right now," not every degree on file.
-    supabase
-      .from("degrees")
-      .select("*, terms(*, courses(*, assignments(*)))")
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const [{ data: applications }, { data: certifications }, { data: activeDegree }, { data: recentAssignments }] =
+    await Promise.all([
+      supabase.from("applications").select("*").in("status", ["saved", "applied", "phone_screen", "interviewing", "offer"]),
+      supabase.from("certifications").select("*").in("status", ["studying", "scheduled"]),
+      // Same active-degree rule as the due-today query above — the GPA
+      // gauge reflects "am I on track right now," not every degree on file.
+      supabase
+        .from("degrees")
+        .select("*, terms(*, courses(*, assignments(*)))")
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle(),
+      // Every assignment due in the last two weeks (any status) — the
+      // due-assignments query above deliberately excludes submitted/
+      // graded work, but Momentum needs both to compute a completion
+      // rate.
+      supabase
+        .from("assignments")
+        .select("*, course:courses!inner(term:terms!inner(degree:degrees!inner(status)))")
+        .gte("due_date", subDays(now, 14).toISOString())
+        .lt("due_date", now.toISOString())
+        .eq("course.term.degree.status", "active"),
+    ]);
 
   const typedApplications = (applications as Application[]) ?? [];
   const typedCertifications = (certifications as Certification[]) ?? [];
   const pipeline = groupApplicationPipeline(typedApplications);
   const openApplications = pipeline.saved + pipeline.applied + pipeline.interviewing + pipeline.offer;
   const nextExam = nextCertificationExam(typedCertifications);
+  const momentum = computeMomentum((recentAssignments as Assignment[]) ?? [], now);
 
   const typedActiveDegree = activeDegree as DegreeWithFullTerms | null;
   const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
@@ -92,6 +105,7 @@ export default async function BriefPage() {
           data={missionBrief}
           dayLabel={format(now, "EEEE, MMMM d")}
           greeting={firstName ? `${greeting(now.getHours())}, ${firstName}.` : `${greeting(now.getHours())}.`}
+          momentum={momentum}
         />
       </div>
 

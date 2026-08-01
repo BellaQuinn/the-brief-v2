@@ -1,17 +1,9 @@
+import { parseDateOnly } from "@/lib/utils";
 import type { Certification } from "@/types/database.types";
 
 export interface NextCertificationExam {
   name: string;
   daysUntil: number;
-}
-
-function parseDateKey(dateKey: string): Date {
-  // Not `new Date(dateKey)` — that parses "yyyy-MM-dd" as UTC midnight,
-  // which rolls back a day in negative-UTC-offset timezones (same
-  // gotcha documented in lib/utils.ts's formatDateOnly and reused from
-  // lib/lsat.ts's daysUntilTest).
-  const [year, month, day] = dateKey.split("-").map(Number);
-  return new Date(year!, month! - 1, day!);
 }
 
 // Picks the nearest upcoming exam among active certifications. Returns
@@ -23,7 +15,7 @@ export function nextCertificationExam(certifications: Certification[]): NextCert
 
   const upcoming = certifications
     .filter((c) => (c.status === "studying" || c.status === "scheduled") && c.exam_date)
-    .map((c) => ({ name: c.name, examDate: parseDateKey(c.exam_date!) }))
+    .map((c) => ({ name: c.name, examDate: parseDateOnly(c.exam_date!) }))
     .filter((c) => c.examDate.getTime() >= today.getTime())
     .sort((a, b) => a.examDate.getTime() - b.examDate.getTime());
 

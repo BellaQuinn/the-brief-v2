@@ -43,6 +43,8 @@ Corollary: every claim in the product's voice must be checkable against real dat
 
 **"ready when you are, Operator."** — the console sign-off. This phrase does not get rewritten once shipped. Consistency here is the point: it's the one line that should become recognizably The Brief's, the way a specific sign-off becomes a brand's voice.
 
-## Momentum — deferred
+## Momentum
 
-A "Momentum" read (e.g. Building / Steady / Excellent / Losing ground) was designed as part of the Mission Brief concept but is intentionally **not implemented** until it can be backed by a real multi-week trend computation (on-time submission rate, application pipeline movement, etc.). Do not add a Momentum line with a hardcoded or vibes-based value — that violates rule 3 above and the project's explicit stance: the app does not invent confidence. If it says the user is doing well, real data has to prove it first.
+Implemented in `lib/momentum.ts`. The reading (Excellent / Steady / Building / Losing ground) is the real completion rate of assignments that came due in the last 14 days — the same window the "all clear" situation line already references. Assignments have no `submitted_at` timestamp, only a final status, so this measures "did it get done," not "was it on time"; that's a deliberate, honest scoping to what the schema actually captures, not a shortcut.
+
+When there are zero assignments due in that window, the function returns `null` and the Mission Brief omits the line entirely — per Silence Is a Feature, a reading with no data behind it doesn't get shown as a placeholder or a guess. If Momentum is ever extended to weigh in other signals (application pipeline movement, certification progress), each one needs its own real, checkable basis before it affects the label — never a hardcoded or vibes-based value. The app does not invent confidence.
