@@ -1,4 +1,4 @@
-import { addDays, endOfDay, format, subDays } from "date-fns";
+import { addDays, endOfDay, subDays } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { MissionBrief } from "@/components/brief/MissionBrief";
 import { FocusList } from "@/components/brief/FocusList";
@@ -12,13 +12,8 @@ import { buildMissionBrief } from "@/lib/missionBrief";
 import { groupApplicationPipeline } from "@/lib/applicationPipeline";
 import { nextCertificationExam } from "@/lib/certifications";
 import { computeMomentum } from "@/lib/momentum";
+import { operatorDayLabel, operatorGreeting } from "@/lib/operatorTime";
 import type { Application, Assignment, AssignmentWithContext, Certification } from "@/types/database.types";
-
-function greeting(hour: number): string {
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
 
 export default async function BriefPage() {
   const supabase = await createClient();
@@ -29,7 +24,7 @@ export default async function BriefPage() {
     data: { user: authUser },
   } = await supabase.auth.getUser();
   const { data: profile } = authUser
-    ? await supabase.from("users").select("first_name").eq("id", authUser.id).single()
+    ? await supabase.from("users").select("first_name, timezone").eq("id", authUser.id).single()
     : { data: null };
 
   // Assignments are queried directly here — never duplicated or cached
@@ -96,6 +91,7 @@ export default async function BriefPage() {
   const gpaCaption = standing ? honorsRangeLabel(standing.termGpa?.gpa ?? null) ?? "Cumulative GPA" : null;
 
   const firstName = profile?.first_name ?? null;
+  const operatorTimeZone = profile?.timezone ?? "UTC";
   const missionBrief = buildMissionBrief(today, upcoming, openApplications, typedCertifications.length);
 
   return (
@@ -103,8 +99,12 @@ export default async function BriefPage() {
       <div className="brief-header-treatment border-b border-border-subtle px-4 pb-8 pt-8 md:px-8">
         <MissionBrief
           data={missionBrief}
-          dayLabel={format(now, "EEEE, MMMM d")}
-          greeting={firstName ? `${greeting(now.getHours())}, ${firstName}.` : `${greeting(now.getHours())}.`}
+          dayLabel={operatorDayLabel(now, operatorTimeZone)}
+          greeting={
+            firstName
+              ? `${operatorGreeting(now, operatorTimeZone)}, ${firstName}.`
+              : `${operatorGreeting(now, operatorTimeZone)}.`
+          }
           momentum={momentum}
         />
       </div>
