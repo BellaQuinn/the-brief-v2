@@ -407,6 +407,114 @@ export function buildTimelineWorkspaceBrief({
   };
 }
 
+export function buildAssignmentsWorkspaceBrief({
+  totalCount,
+  openCount,
+  overdueCount,
+}: {
+  totalCount: number;
+  openCount: number;
+  overdueCount: number;
+}): WorkspaceBriefData {
+  if (totalCount === 0) {
+    return {
+      status: "Ledger empty.",
+      situation: "No assignments are recorded across any degree yet.",
+      directive: "Add the first assignment once coursework begins.",
+    };
+  }
+  if (openCount === 0) {
+    return {
+      status: "Ledger clear.",
+      situation: `All ${totalCount} recorded assignment${totalCount === 1 ? " is" : "s are"} submitted or graded.`,
+      directive: "Nothing open — check back once new work is assigned.",
+    };
+  }
+  if (overdueCount > 0) {
+    return {
+      status: "Ledger needs attention.",
+      situation: `${overdueCount} assignment${overdueCount === 1 ? " is" : "s are"} overdue out of ${openCount} open.`,
+      directive: "Resolve the oldest overdue item first.",
+    };
+  }
+  return {
+    status: "Ledger current.",
+    situation: `${openCount} assignment${openCount === 1 ? " is" : "s are"} open across your coursework.`,
+    directive: "Filter by course or priority to plan the next move.",
+  };
+}
+
+export function buildCoursesWorkspaceBrief({
+  courseCount,
+  inProgressCount,
+  lowestGradeCourseName,
+  lowestGradePercentage,
+}: {
+  courseCount: number;
+  inProgressCount: number;
+  lowestGradeCourseName: string | null;
+  lowestGradePercentage: number | null;
+}): WorkspaceBriefData {
+  if (courseCount === 0) {
+    return {
+      status: "Course list empty.",
+      situation: "No courses are recorded yet.",
+      directive: "Add your current courses to start tracking standing.",
+    };
+  }
+  if (inProgressCount === 0) {
+    return {
+      status: "No course currently in progress.",
+      situation: `${courseCount} course${courseCount === 1 ? " is" : "s are"} on record, none marked in progress.`,
+      directive: "Mark the current term's courses in progress.",
+    };
+  }
+  if (lowestGradeCourseName && lowestGradePercentage != null) {
+    return {
+      status: "Standing reviewed.",
+      situation: `${inProgressCount} course${inProgressCount === 1 ? " is" : "s are"} in progress. ${lowestGradeCourseName} is currently your lowest standing at ${lowestGradePercentage.toFixed(0)}%.`,
+      directive: `Open ${lowestGradeCourseName} to review what's left.`,
+    };
+  }
+  return {
+    status: "Courses active. Grades pending.",
+    situation: `${inProgressCount} course${inProgressCount === 1 ? " is" : "s are"} in progress with no graded work yet.`,
+    directive: "Check back once assignments are graded.",
+  };
+}
+
+export function buildPlannerWorkspaceBrief({
+  openCount,
+  overdueCount,
+  topItemTitle,
+  topItemReason,
+}: {
+  openCount: number;
+  overdueCount: number;
+  topItemTitle: string | null;
+  topItemReason: string | null;
+}): WorkspaceBriefData {
+  if (openCount === 0 || !topItemTitle) {
+    return {
+      status: "Queue clear.",
+      situation: "Nothing open needs prioritizing right now.",
+      directive: "Check back once new work is assigned.",
+    };
+  }
+  if (overdueCount > 0) {
+    return {
+      status: "Recovery needed.",
+      situation: `${overdueCount} item${overdueCount === 1 ? " is" : "s are"} overdue among ${openCount} open.`,
+      directive: `Start with ${topItemTitle}${topItemReason ? ` — ${topItemReason}` : "."}`,
+    };
+  }
+  return {
+    status: "Queue prioritized.",
+    situation: `${openCount} item${openCount === 1 ? " is" : "s are"} open, ranked by urgency.`,
+    directive: `Start with ${topItemTitle}${topItemReason ? ` — ${topItemReason}` : "."}`,
+  };
+}
+
 export function buildDocumentsWorkspaceBrief({
   documentCount,
   linkedSourceCount,

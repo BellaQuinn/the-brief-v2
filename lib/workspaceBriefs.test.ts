@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   buildAcademicsWorkspaceBrief,
   buildAcademicStandingWorkspaceBrief,
+  buildAssignmentsWorkspaceBrief,
   buildCareerWorkspaceBrief,
   buildCalendarWorkspaceBrief,
+  buildCoursesWorkspaceBrief,
   buildDocumentsWorkspaceBrief,
   buildLawSchoolOverviewWorkspaceBrief,
   buildLsatWorkspaceBrief,
+  buildPlannerWorkspaceBrief,
   buildResourcesWorkspaceBrief,
   buildScholarshipsWorkspaceBrief,
   buildSchoolApplicationsWorkspaceBrief,
@@ -14,6 +17,101 @@ import {
   buildSettingsWorkspaceBrief,
   buildTimelineWorkspaceBrief,
 } from "@/lib/workspaceBriefs";
+
+describe("buildAssignmentsWorkspaceBrief", () => {
+  it("reports an empty ledger when nothing is recorded", () => {
+    const brief = buildAssignmentsWorkspaceBrief({ totalCount: 0, openCount: 0, overdueCount: 0 });
+    expect(brief.status).toBe("Ledger empty.");
+  });
+
+  it("reports a clear ledger when everything recorded is done, not just when nothing exists", () => {
+    const brief = buildAssignmentsWorkspaceBrief({ totalCount: 12, openCount: 0, overdueCount: 0 });
+    expect(brief.status).toBe("Ledger clear.");
+    expect(brief.situation).toContain("12");
+  });
+
+  it("leads with overdue count when anything is overdue", () => {
+    const brief = buildAssignmentsWorkspaceBrief({ totalCount: 12, openCount: 5, overdueCount: 2 });
+    expect(brief.status).toBe("Ledger needs attention.");
+    expect(brief.situation).toBe("2 assignments are overdue out of 5 open.");
+  });
+
+  it("reports current when open work exists with nothing overdue", () => {
+    const brief = buildAssignmentsWorkspaceBrief({ totalCount: 12, openCount: 5, overdueCount: 0 });
+    expect(brief.status).toBe("Ledger current.");
+  });
+});
+
+describe("buildCoursesWorkspaceBrief", () => {
+  it("reports an empty course list", () => {
+    const brief = buildCoursesWorkspaceBrief({
+      courseCount: 0,
+      inProgressCount: 0,
+      lowestGradeCourseName: null,
+      lowestGradePercentage: null,
+    });
+    expect(brief.status).toBe("Course list empty.");
+  });
+
+  it("does not claim standing when no course is in progress", () => {
+    const brief = buildCoursesWorkspaceBrief({
+      courseCount: 3,
+      inProgressCount: 0,
+      lowestGradeCourseName: null,
+      lowestGradePercentage: null,
+    });
+    expect(brief.status).toBe("No course currently in progress.");
+  });
+
+  it("does not name a lowest-standing course without real graded evidence", () => {
+    const brief = buildCoursesWorkspaceBrief({
+      courseCount: 3,
+      inProgressCount: 2,
+      lowestGradeCourseName: null,
+      lowestGradePercentage: null,
+    });
+    expect(brief.status).toBe("Courses active. Grades pending.");
+  });
+
+  it("names the real lowest-standing course only when both name and percentage exist", () => {
+    const brief = buildCoursesWorkspaceBrief({
+      courseCount: 3,
+      inProgressCount: 2,
+      lowestGradeCourseName: "COMM-230",
+      lowestGradePercentage: 82.4,
+    });
+    expect(brief.situation).toContain("COMM-230 is currently your lowest standing at 82%");
+  });
+});
+
+describe("buildPlannerWorkspaceBrief", () => {
+  it("reports a clear queue when nothing is open", () => {
+    const brief = buildPlannerWorkspaceBrief({ openCount: 0, overdueCount: 0, topItemTitle: null, topItemReason: null });
+    expect(brief.status).toBe("Queue clear.");
+  });
+
+  it("leads with recovery when anything is overdue", () => {
+    const brief = buildPlannerWorkspaceBrief({
+      openCount: 4,
+      overdueCount: 1,
+      topItemTitle: "Problem Set 4",
+      topItemReason: "Overdue by 2 days.",
+    });
+    expect(brief.status).toBe("Recovery needed.");
+    expect(brief.directive).toBe("Start with Problem Set 4 — Overdue by 2 days.");
+  });
+
+  it("names the top-ranked item as the directive when nothing is overdue", () => {
+    const brief = buildPlannerWorkspaceBrief({
+      openCount: 4,
+      overdueCount: 0,
+      topItemTitle: "Torts Reading",
+      topItemReason: "Due tomorrow.",
+    });
+    expect(brief.status).toBe("Queue prioritized.");
+    expect(brief.directive).toBe("Start with Torts Reading — Due tomorrow.");
+  });
+});
 
 describe("buildLsatWorkspaceBrief", () => {
   it("does not infer progress without a goal", () => {

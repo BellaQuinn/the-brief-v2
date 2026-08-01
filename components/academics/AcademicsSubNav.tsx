@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 const TABS: { path: string | null; label: string }[] = [
   { path: "", label: "Overview" },
   { path: "/standing", label: "Academic Standing" },
-  { path: null, label: "Planner" },
-  { path: null, label: "Courses" },
-  { path: null, label: "Assignments" },
+  { path: "/planner", label: "Planner" },
+  { path: "/courses", label: "Courses" },
+  { path: "/assignments", label: "Assignments" },
   { path: "/graduate-law-school", label: "Graduate & Law School" },
   { path: null, label: "Documents" },
 ];

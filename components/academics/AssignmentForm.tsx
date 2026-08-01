@@ -54,6 +54,7 @@ export function AssignmentForm({ courseId, assignment, onSaved, onCancel }: Assi
   const [pointsEarned, setPointsEarned] = useState(String(assignment?.points_earned ?? ""));
   const [status, setStatus] = useState<AssignmentStatus>(assignment?.status ?? "not_started");
   const [priority, setPriority] = useState<PriorityLevel>(assignment?.priority ?? "medium");
+  const [estimatedMinutes, setEstimatedMinutes] = useState(String(assignment?.estimated_minutes ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -66,11 +67,20 @@ export function AssignmentForm({ courseId, assignment, onSaved, onCancel }: Assi
       title,
       description: description || null,
       type,
-      due_date: dueDate || null,
+      // due_date is `timestamptz`, but this field only collects a plain
+      // calendar date (no time). Storing it at literal UTC midnight rolls
+      // back a day for any negative-UTC-offset reader (e.g. entering
+      // "Jul 30" would read back as "Jul 29" in US timezones) — the exact
+      // bug this project has already fixed for plain `date` columns
+      // elsewhere. Anchoring at noon UTC keeps the calendar date stable
+      // across every real-world offset (-12 to +14) without needing to
+      // know the operator's timezone here.
+      due_date: dueDate ? `${dueDate}T12:00:00.000Z` : null,
       points_possible: pointsPossible ? Number(pointsPossible) : null,
       points_earned: pointsEarned ? Number(pointsEarned) : null,
       status,
       priority,
+      estimated_minutes: estimatedMinutes ? Number(estimatedMinutes) : null,
     };
 
     const { data, error } = assignment
@@ -121,6 +131,17 @@ export function AssignmentForm({ courseId, assignment, onSaved, onCancel }: Assi
           value={pointsEarned}
           onChange={(e) => setPointsEarned(e.target.value)}
         />
+      </div>
+      <div>
+        <Input
+          label="Estimated time (minutes)"
+          type="number"
+          min={0}
+          step={5}
+          value={estimatedMinutes}
+          onChange={(e) => setEstimatedMinutes(e.target.value)}
+        />
+        <p className="mt-1 text-xs text-ink-tertiary">Powers Planner's workload estimate — leave blank if unknown.</p>
       </div>
       <Textarea label="Description" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
 
