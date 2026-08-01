@@ -28,10 +28,12 @@ const CATEGORY_LABEL: Record<ResourceCategory, string> = {
 
 export function ResourceCard({
   resource,
+  index,
   onSaved,
   onDeleted,
 }: {
   resource: Resource;
+  index: number;
   onSaved: (r: Resource) => void;
   onDeleted: (id: string) => void;
 }) {
@@ -66,13 +68,23 @@ export function ResourceCard({
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-start gap-2">
+    <article className="relative py-4 pl-9">
+      <span aria-hidden className="trace-node" />
+      <span aria-hidden className="trace-connector" />
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+        <div className="flex min-w-0 items-start gap-3">
+          <span className="font-mono text-[8px] text-accent/80">{String(index).padStart(2, "0")}</span>
           <Icon className="mt-0.5 h-4 w-4 shrink-0 text-ink-tertiary" />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-ink-primary">{resource.title}</p>
-            <p className="mt-0.5 text-[11px] text-ink-tertiary">{CATEGORY_LABEL[resource.category]}</p>
+            <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-ink-tertiary">{CATEGORY_LABEL[resource.category]}</p>
+            {resource.notes && <p className="mt-2 text-xs text-ink-secondary">{resource.notes}</p>}
+            {resource.url && (
+              <a href={resource.url} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-1.5 truncate text-xs text-accent hover:text-accent-bright">
+                <ExternalLink className="h-3 w-3 shrink-0" />
+                <span className="truncate">{resource.url}</span>
+              </a>
+            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -102,20 +114,6 @@ export function ResourceCard({
         </div>
       </div>
 
-      {resource.notes && <p className="mt-2 text-xs text-ink-secondary">{resource.notes}</p>}
-
-      {resource.url && (
-        <a
-          href={resource.url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 flex items-center gap-1.5 truncate text-xs text-signal hover:text-signal-bright"
-        >
-          <ExternalLink className="h-3 w-3 shrink-0" />
-          <span className="truncate">{resource.url}</span>
-        </a>
-      )}
-
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit resource">
         <ResourceForm
           resource={resource}
@@ -126,6 +124,6 @@ export function ResourceCard({
           onCancel={() => setEditing(false)}
         />
       </Modal>
-    </div>
+    </article>
   );
 }

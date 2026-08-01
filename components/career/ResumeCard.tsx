@@ -17,9 +17,9 @@ export function ResumeCard({
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="flex items-center justify-between rounded-card border border-border bg-surface px-4 py-3">
+    <div className="signal-field signal-field-accent flex items-center justify-between gap-5 px-5 py-6 md:px-7">
       <div className="min-w-0">
-        <p className="eyebrow mb-1">Resume</p>
+        <p className="eyebrow mb-2">Source status</p>
         {resumeUrl ? (
           <div className="flex items-center gap-2">
             <a

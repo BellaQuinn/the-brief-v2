@@ -56,12 +56,15 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md space-y-4 rounded-card border border-border bg-surface p-5">
+    <form onSubmit={handleSubmit} className="signal-field max-w-3xl px-5 py-6 md:px-7">
+      <div className="grid gap-7 md:grid-cols-[180px_minmax(0,1fr)]">
       <div>
-        <p className="eyebrow mb-1">Profile</p>
-        <p className="text-xs text-ink-tertiary">{profile.email}</p>
+        <p className="font-mono text-[10px] uppercase tracking-eyebrow text-signal/75">Account channel</p>
+        <p className="mt-2 break-all text-sm text-ink-primary">{profile.email}</p>
+        <p className="mt-2 text-xs text-ink-tertiary">Authentication email is managed separately from the operator label.</p>
       </div>
 
+      <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <Input label="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
@@ -79,6 +82,8 @@ export function ProfileForm({
         <Button type="submit" disabled={loading}>
           {loading ? "Saving…" : "Save profile"}
         </Button>
+      </div>
+      </div>
       </div>
     </form>
   );

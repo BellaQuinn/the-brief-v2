@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildAcademicsWorkspaceBrief,
   buildAcademicStandingWorkspaceBrief,
+  buildCareerWorkspaceBrief,
   buildLsatWorkspaceBrief,
+  buildResourcesWorkspaceBrief,
+  buildSettingsWorkspaceBrief,
 } from "@/lib/workspaceBriefs";
 
 describe("buildLsatWorkspaceBrief", () => {
@@ -40,6 +43,54 @@ describe("buildLsatWorkspaceBrief", () => {
     });
     expect(brief.situation).toContain("6 points remain");
     expect(brief.directive).toContain("planned test date");
+  });
+});
+
+describe("buildCareerWorkspaceBrief", () => {
+  it("prioritizes a real follow-up over other pipeline activity", () => {
+    const brief = buildCareerWorkspaceBrief({
+      certificationCount: 2,
+      activeCertificationCount: 1,
+      activeApplicationCount: 3,
+      dueFollowUpCount: 1,
+    });
+    expect(brief.status).toBe("Relationships need a follow-through.");
+    expect(brief.situation).toContain("1 contact has a follow-up due");
+  });
+
+  it("keeps a quiet workspace calm", () => {
+    const brief = buildCareerWorkspaceBrief({
+      certificationCount: 0,
+      activeCertificationCount: 0,
+      activeApplicationCount: 0,
+      dueFollowUpCount: 0,
+    });
+    expect(brief.status).toBe("Career workspace ready.");
+  });
+});
+
+describe("buildResourcesWorkspaceBrief", () => {
+  it("does not manufacture activity for an empty archive", () => {
+    const brief = buildResourcesWorkspaceBrief({ resourceCount: 0, favoriteCount: 0 });
+    expect(brief.status).toBe("Archive clear.");
+  });
+
+  it("backs the index reading with saved and favorite counts", () => {
+    const brief = buildResourcesWorkspaceBrief({ resourceCount: 5, favoriteCount: 2 });
+    expect(brief.situation).toContain("5 resources");
+    expect(brief.situation).toContain("2 are marked");
+  });
+});
+
+describe("buildSettingsWorkspaceBrief", () => {
+  it("names an incomplete identity field", () => {
+    const brief = buildSettingsWorkspaceBrief({ hasName: false, hasTimezone: true });
+    expect(brief.situation).toContain("operator name");
+  });
+
+  it("only calls configuration current when both fields exist", () => {
+    const brief = buildSettingsWorkspaceBrief({ hasName: true, hasTimezone: true });
+    expect(brief.status).toBe("Configuration current.");
   });
 });
 

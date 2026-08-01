@@ -37,9 +37,15 @@ export function PasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md space-y-4 rounded-card border border-border bg-surface p-5">
-      <p className="eyebrow mb-1">Password</p>
+    <form onSubmit={handleSubmit} className="signal-field signal-field-accent max-w-3xl px-5 py-6 md:px-7">
+      <div className="grid gap-7 md:grid-cols-[180px_minmax(0,1fr)]">
+      <div>
+        <p className="font-mono text-[10px] uppercase tracking-eyebrow text-accent/80">Private credential</p>
+        <p className="mt-2 text-sm text-ink-primary">Password values are never displayed.</p>
+        <p className="mt-2 text-xs text-ink-tertiary">Rotation takes effect after the update is accepted.</p>
+      </div>
 
+      <div className="space-y-4">
       <Input
         label="New password"
         type="password"
@@ -67,6 +73,8 @@ export function PasswordForm() {
         <Button type="submit" disabled={loading || !password}>
           {loading ? "Updating…" : "Update password"}
         </Button>
+      </div>
+      </div>
       </div>
     </form>
   );

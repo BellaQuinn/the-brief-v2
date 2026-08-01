@@ -121,3 +121,85 @@ export function buildAcademicStandingWorkspaceBrief({
         : "Keep final grades current as coursework closes.",
   };
 }
+
+export function buildCareerWorkspaceBrief({
+  certificationCount,
+  activeCertificationCount,
+  activeApplicationCount,
+  dueFollowUpCount,
+}: {
+  certificationCount: number;
+  activeCertificationCount: number;
+  activeApplicationCount: number;
+  dueFollowUpCount: number;
+}): WorkspaceBriefData {
+  if (dueFollowUpCount > 0) {
+    return {
+      status: "Relationships need a follow-through.",
+      situation: `${dueFollowUpCount} contact${dueFollowUpCount === 1 ? " has" : "s have"} a follow-up due. ${activeApplicationCount} application${activeApplicationCount === 1 ? " is" : "s are"} currently active.`,
+      directive: "Open the relationship trace and complete the next follow-up.",
+    };
+  }
+  if (activeApplicationCount > 0) {
+    return {
+      status: "Career pipeline in motion.",
+      situation: `${activeApplicationCount} application${activeApplicationCount === 1 ? " is" : "s are"} active across the pipeline; no contact follow-up is currently due.`,
+      directive: "Advance the application with the clearest recorded next action.",
+    };
+  }
+  if (activeCertificationCount > 0) {
+    return {
+      status: "Credentials in progress. Pipeline open.",
+      situation: `${activeCertificationCount} of ${certificationCount} tracked certification${certificationCount === 1 ? " is" : "s are"} currently underway. No job application is active.`,
+      directive: "Record the next certification milestone or add a target role.",
+    };
+  }
+  return {
+    status: "Career workspace ready.",
+    situation: "No application, certification, or relationship currently requires attention.",
+    directive: "Add the next real career objective when one is ready to track.",
+  };
+}
+
+export function buildResourcesWorkspaceBrief({
+  resourceCount,
+  favoriteCount,
+}: {
+  resourceCount: number;
+  favoriteCount: number;
+}): WorkspaceBriefData {
+  if (resourceCount === 0) {
+    return {
+      status: "Archive clear.",
+      situation: "No resources are saved, so there is nothing to sort or review.",
+      directive: "Add a resource when it is useful enough to retrieve again.",
+    };
+  }
+  return {
+    status: "Archive indexed.",
+    situation: `${resourceCount} resource${resourceCount === 1 ? " is" : "s are"} saved${favoriteCount > 0 ? `; ${favoriteCount} ${favoriteCount === 1 ? "is" : "are"} marked for priority access` : "; none is marked for priority access"}.`,
+    directive: favoriteCount > 0 ? "Open a priority resource or query the archive below." : "Mark the most reusable item for priority access.",
+  };
+}
+
+export function buildSettingsWorkspaceBrief({
+  hasName,
+  hasTimezone,
+}: {
+  hasName: boolean;
+  hasTimezone: boolean;
+}): WorkspaceBriefData {
+  if (!hasName || !hasTimezone) {
+    const missing = [!hasName && "operator name", !hasTimezone && "timezone"].filter(Boolean).join(" and ");
+    return {
+      status: "Configuration needs one update.",
+      situation: `The account is active, but the ${missing} ${missing.includes(" and ") ? "are" : "is"} not configured.`,
+      directive: "Complete the missing identity setting below.",
+    };
+  }
+  return {
+    status: "Configuration current.",
+    situation: "Operator identity and timezone are configured. Password details remain private and are never displayed here.",
+    directive: "Update a setting only when your operating context changes.",
+  };
+}
