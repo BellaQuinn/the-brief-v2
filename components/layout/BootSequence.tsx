@@ -7,7 +7,12 @@ import { markBootSequenceShown, shouldShowBootSequence } from "@/lib/bootSequenc
 // "Hacker DNA" principle made concrete: a memorable moment on the day's
 // first load, not a permanent aesthetic. See lib/bootSequence.ts for the
 // trigger rule. Skippable by design — never makes anyone wait to work.
-const LINES = ["Initializing The Brief...", "Syncing data sources...", "Verifying integrity...", "All systems operational."];
+const LINES = [
+  "Reviewing academic standing...",
+  "Checking application pipeline...",
+  "Cross-referencing your calendar...",
+  "Briefing ready.",
+];
 
 const LINE_DELAY_MS = 220;
 const HOLD_MS = 500;

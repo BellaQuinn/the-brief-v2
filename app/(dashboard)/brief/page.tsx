@@ -1,12 +1,13 @@
 import { addDays, endOfDay, format } from "date-fns";
 import { AlertCircle, Award, Briefcase } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { MissionBrief } from "@/components/brief/MissionBrief";
 import { FocusList } from "@/components/brief/FocusList";
 import { StatTile } from "@/components/brief/StatTile";
 import { GpaCard } from "@/components/brief/GpaCard";
 import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
 import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/academicStanding/build";
+import { buildMissionBrief } from "@/lib/missionBrief";
 import type { AssignmentWithContext } from "@/types/database.types";
 
 function greeting(hour: number): string {
@@ -74,16 +75,19 @@ export default async function BriefPage() {
   const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
 
   const firstName = profile?.first_name ?? null;
+  const missionBrief = buildMissionBrief(today, upcoming, openApplications ?? 0, activeCerts ?? 0);
 
   return (
     <div>
-      <WorkspaceHeader
-        eyebrow={format(now, "EEEE, MMMM d")}
-        title={firstName ? `${greeting(now.getHours())}, ${firstName}.` : `${greeting(now.getHours())}.`}
-        subtitle="Here's what deserves your attention today."
-      />
+      <div className="px-4 pt-8 md:px-8">
+        <MissionBrief
+          data={missionBrief}
+          dayLabel={format(now, "EEEE, MMMM d")}
+          greeting={firstName ? `${greeting(now.getHours())}, ${firstName}.` : `${greeting(now.getHours())}.`}
+        />
+      </div>
 
-      <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
+      <div className="grid grid-cols-1 gap-4 px-4 pt-8 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
         <StatTile
           label="Due today"
           value={String(today.length)}
