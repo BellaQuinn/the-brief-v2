@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { Modal } from "@/components/ui/Modal";
 import { SchoolApplicationCard } from "@/components/graduateLawSchool/SchoolApplicationCard";
 import { SchoolForm } from "@/components/graduateLawSchool/SchoolForm";
 import { STATUS_LABEL } from "@/components/graduateLawSchool/SchoolBadges";
+import { buildSchoolApplicationsWorkspaceBrief } from "@/lib/workspaceBriefs";
 import type { LawSchool, LawSchoolStatus } from "@/types/database.types";
 
 function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
@@ -22,14 +23,32 @@ const COLUMNS: { value: LawSchoolStatus; label: string }[] = Object.entries(STAT
 export function SchoolApplicationKanban({ initialSchools }: { initialSchools: LawSchool[] }) {
   const [schools, setSchools] = useState(initialSchools);
   const [adding, setAdding] = useState(false);
+  const activeApplicationCount = schools.filter(({ status }) =>
+    ["planning_to_apply", "applying", "applied", "waitlisted"].includes(status)
+  ).length;
+  const decisionCount = schools.filter(({ status }) => ["accepted", "rejected", "enrolled"].includes(status)).length;
+  const brief = buildSchoolApplicationsWorkspaceBrief({
+    schoolCount: schools.length,
+    activeApplicationCount,
+    decisionCount,
+  });
 
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow="GRADUATE & LAW SCHOOL // APPLICATIONS"
-        title="Applications"
-        hideDots
-        subtitle="Same schools as the Schools tab, grouped by where each application stands."
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${activeApplicationCount} active · ${decisionCount} decisions`}
+        action={
+          <button
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1.5 border border-accent/30 bg-accent-dim/50 px-3 py-2 text-xs font-medium text-accent-bright transition-colors hover:border-accent/60 hover:bg-accent-dim"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add school
+          </button>
+        }
       />
 
       <div className="px-4 py-6 md:px-8">

@@ -203,3 +203,236 @@ export function buildSettingsWorkspaceBrief({
     directive: "Update a setting only when your operating context changes.",
   };
 }
+
+export function buildCalendarWorkspaceBrief({
+  selectedLabel,
+  selectedEventCount,
+  totalEventCount,
+  overdueCount,
+}: {
+  selectedLabel: string;
+  selectedEventCount: number;
+  totalEventCount: number;
+  overdueCount: number;
+}): WorkspaceBriefData {
+  if (overdueCount > 0) {
+    return {
+      status: "Schedule needs a recovery move.",
+      situation: `${overdueCount} past-due assignment${overdueCount === 1 ? " remains" : "s remain"} on the timeline. ${selectedLabel} has ${selectedEventCount} scheduled item${selectedEventCount === 1 ? "" : "s"}.`,
+      directive: "Open the oldest past-due assignment and record the next move.",
+    };
+  }
+  if (selectedEventCount > 0) {
+    return {
+      status: `${selectedLabel} is scheduled.`,
+      situation: `${selectedEventCount} item${selectedEventCount === 1 ? " is" : "s are"} attached to the selected day; ${totalEventCount} dated item${totalEventCount === 1 ? " is" : "s are"} visible across the timeline.`,
+      directive: "Review the selected-day detail before moving to the next date.",
+    };
+  }
+  return {
+    status: `${selectedLabel} is clear.`,
+    situation:
+      totalEventCount === 0
+        ? "No dated assignments, certification exams, or networking follow-ups are on the timeline."
+        : `Nothing is scheduled for the selected day; ${totalEventCount} dated item${totalEventCount === 1 ? " remains" : "s remain"} elsewhere on the timeline.`,
+    directive:
+      totalEventCount === 0
+        ? "Add dates in the source workspace when a real commitment is established."
+        : "Select a marked date to review its commitments.",
+  };
+}
+
+export function buildLawSchoolOverviewWorkspaceBrief({
+  schoolCount,
+  scholarshipCount,
+  milestoneCount,
+  nextDeadlineLabel,
+}: {
+  schoolCount: number;
+  scholarshipCount: number;
+  milestoneCount: number;
+  nextDeadlineLabel: string | null;
+}): WorkspaceBriefData {
+  if (schoolCount === 0 && scholarshipCount === 0 && milestoneCount === 0) {
+    return {
+      status: "Law school plan not established.",
+      situation: "No schools, scholarships, or roadmap milestones are on record yet.",
+      directive: "Add the first school to give the pathway a destination.",
+    };
+  }
+  if (nextDeadlineLabel) {
+    return {
+      status: "Next deadline identified.",
+      situation: `${nextDeadlineLabel} is the nearest dated commitment. ${schoolCount} school${schoolCount === 1 ? " is" : "s are"} and ${scholarshipCount} scholarship${scholarshipCount === 1 ? " is" : "s are"} currently tracked.`,
+      directive: "Review the nearest deadline and confirm its supporting milestone is current.",
+    };
+  }
+  const trackedSignals = [
+    schoolCount > 0 ? `${schoolCount} school${schoolCount === 1 ? "" : "s"}` : null,
+    scholarshipCount > 0 ? `${scholarshipCount} scholarship${scholarshipCount === 1 ? "" : "s"}` : null,
+    milestoneCount > 0 ? `${milestoneCount} milestone${milestoneCount === 1 ? "" : "s"}` : null,
+  ].filter(Boolean);
+  const trackedItemCount = schoolCount + scholarshipCount + milestoneCount;
+  return {
+    status: "Pathway mapped. Dates still open.",
+    situation: `${trackedSignals.join(", ")} ${trackedItemCount === 1 ? "is" : "are"} on record, with no upcoming deadline identified.`,
+    directive: "Add the next known deadline or target date to anchor the roadmap.",
+  };
+}
+
+export function buildSchoolsWorkspaceBrief({
+  schoolCount,
+  prioritizedCount,
+  activeCount,
+}: {
+  schoolCount: number;
+  prioritizedCount: number;
+  activeCount: number;
+}): WorkspaceBriefData {
+  if (schoolCount === 0) {
+    return {
+      status: "School field not established.",
+      situation: "No schools are tracked, so comparison and application position cannot be assessed.",
+      directive: "Add the first school you are seriously considering.",
+    };
+  }
+  if (prioritizedCount < schoolCount) {
+    return {
+      status: "School field built. Priorities incomplete.",
+      situation: `${schoolCount} school${schoolCount === 1 ? " is" : "s are"} tracked; ${schoolCount - prioritizedCount} still ${schoolCount - prioritizedCount === 1 ? "needs" : "need"} a priority tier.`,
+      directive: "Assign the next missing priority so the field can be compared clearly.",
+    };
+  }
+  return {
+    status: "School field mapped.",
+    situation: `${schoolCount} school${schoolCount === 1 ? " is" : "s are"} prioritized; ${activeCount} ${activeCount === 1 ? "has" : "have"} moved beyond research.` ,
+    directive: activeCount > 0 ? "Open the most advanced school and verify its next requirement." : "Move the strongest candidate beyond research when the evidence supports it.",
+  };
+}
+
+export function buildSchoolApplicationsWorkspaceBrief({
+  schoolCount,
+  activeApplicationCount,
+  decisionCount,
+}: {
+  schoolCount: number;
+  activeApplicationCount: number;
+  decisionCount: number;
+}): WorkspaceBriefData {
+  if (schoolCount === 0) {
+    return {
+      status: "Application pipeline not established.",
+      situation: "No schools are available to move through the application cycle.",
+      directive: "Add a school before opening an application track.",
+    };
+  }
+  if (activeApplicationCount === 0 && decisionCount === 0) {
+    return {
+      status: "Research queue established.",
+      situation: `${schoolCount} school${schoolCount === 1 ? " is" : "s are"} tracked, but no application has entered an active stage.`,
+      directive: "Move the next qualified school into planning when you are ready to act.",
+    };
+  }
+  return {
+    status: "Application cycle in motion.",
+    situation: `${activeApplicationCount} application${activeApplicationCount === 1 ? " is" : "s are"} active; ${decisionCount} decision${decisionCount === 1 ? " is" : "s are"} recorded.`,
+    directive: activeApplicationCount > 0 ? "Advance the active application with the nearest requirement." : "Review the recorded decisions before choosing the next move.",
+  };
+}
+
+export function buildScholarshipsWorkspaceBrief({
+  scholarshipCount,
+  activeCount,
+  upcomingDeadlineCount,
+}: {
+  scholarshipCount: number;
+  activeCount: number;
+  upcomingDeadlineCount: number;
+}): WorkspaceBriefData {
+  if (scholarshipCount === 0) {
+    return {
+      status: "Funding search not established.",
+      situation: "No scholarships are tracked, so funding coverage cannot be assessed.",
+      directive: "Add the first relevant funding opportunity.",
+    };
+  }
+  if (upcomingDeadlineCount > 0) {
+    return {
+      status: "Funding deadlines are active.",
+      situation: `${upcomingDeadlineCount} upcoming deadline${upcomingDeadlineCount === 1 ? " is" : "s are"} attached to ${scholarshipCount} tracked scholarship${scholarshipCount === 1 ? "" : "s"}; ${activeCount} ${activeCount === 1 ? "is" : "are"} in an active stage.`,
+      directive: "Open the nearest scholarship deadline and verify its requirements.",
+    };
+  }
+  return {
+    status: "Funding field tracked. Dates still open.",
+    situation: `${scholarshipCount} scholarship${scholarshipCount === 1 ? " is" : "s are"} on record with no upcoming deadline identified.`,
+    directive: "Add the next known deadline or move one opportunity into an active stage.",
+  };
+}
+
+export function buildTimelineWorkspaceBrief({
+  milestoneCount,
+  inProgressCount,
+  completedCount,
+}: {
+  milestoneCount: number;
+  inProgressCount: number;
+  completedCount: number;
+}): WorkspaceBriefData {
+  if (milestoneCount === 0) {
+    return {
+      status: "Roadmap not established.",
+      situation: "No milestones are available to show sequence or current position.",
+      directive: "Add the first meaningful milestone in the law school journey.",
+    };
+  }
+  if (inProgressCount > 0) {
+    return {
+      status: "Roadmap in motion.",
+      situation: `${inProgressCount} milestone${inProgressCount === 1 ? " is" : "s are"} in progress; ${completedCount} of ${milestoneCount} ${completedCount === 1 ? "is" : "are"} complete.`,
+      directive: "Open the current milestone and record the next concrete move.",
+    };
+  }
+  if (completedCount === milestoneCount) {
+    return {
+      status: "Roadmap complete.",
+      situation: `All ${milestoneCount} milestone${milestoneCount === 1 ? " is" : "s are"} marked complete.`,
+      directive: "Add another milestone only if the pathway has genuinely changed.",
+    };
+  }
+  return {
+    status: "Roadmap mapped. Current step unassigned.",
+    situation: `${completedCount} of ${milestoneCount} milestone${milestoneCount === 1 ? " is" : "s are"} complete, with none marked in progress.`,
+    directive: "Mark the next milestone in progress to establish current position.",
+  };
+}
+
+export function buildDocumentsWorkspaceBrief({
+  documentCount,
+  linkedSourceCount,
+  schoolLinkedCount,
+}: {
+  documentCount: number;
+  linkedSourceCount: number;
+  schoolLinkedCount: number;
+}): WorkspaceBriefData {
+  if (documentCount === 0) {
+    return {
+      status: "Application dossier not started.",
+      situation: "No essays, recommendations, transcripts, financial records, or supporting documents are tracked.",
+      directive: "Add the first document already in active preparation.",
+    };
+  }
+  if (linkedSourceCount < documentCount) {
+    return {
+      status: "Dossier in assembly.",
+      situation: `${documentCount} document${documentCount === 1 ? " is" : "s are"} tracked; ${documentCount - linkedSourceCount} ${documentCount - linkedSourceCount === 1 ? "does" : "do"} not yet have a source link. ${schoolLinkedCount} ${schoolLinkedCount === 1 ? "is" : "are"} assigned to a school.`,
+      directive: "Attach the next available source link so the record can be retrieved.",
+    };
+  }
+  return {
+    status: "Dossier sources connected.",
+    situation: `All ${documentCount} tracked document${documentCount === 1 ? " has" : "s have"} a source link; ${schoolLinkedCount} ${schoolLinkedCount === 1 ? "is" : "are"} assigned to a school.`,
+    directive: "Review the next document required by an active application.",
+  };
+}

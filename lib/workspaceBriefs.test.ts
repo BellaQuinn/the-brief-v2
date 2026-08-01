@@ -3,9 +3,16 @@ import {
   buildAcademicsWorkspaceBrief,
   buildAcademicStandingWorkspaceBrief,
   buildCareerWorkspaceBrief,
+  buildCalendarWorkspaceBrief,
+  buildDocumentsWorkspaceBrief,
+  buildLawSchoolOverviewWorkspaceBrief,
   buildLsatWorkspaceBrief,
   buildResourcesWorkspaceBrief,
+  buildScholarshipsWorkspaceBrief,
+  buildSchoolApplicationsWorkspaceBrief,
+  buildSchoolsWorkspaceBrief,
   buildSettingsWorkspaceBrief,
+  buildTimelineWorkspaceBrief,
 } from "@/lib/workspaceBriefs";
 
 describe("buildLsatWorkspaceBrief", () => {
@@ -134,5 +141,77 @@ describe("buildAcademicStandingWorkspaceBrief", () => {
     expect(brief.situation).toContain("3.72");
     expect(brief.situation).toContain("3.81");
     expect(brief.directive).toContain("3 projected course outcomes");
+  });
+});
+
+describe("remaining workspace briefs", () => {
+  it("keeps a genuinely empty calendar calm", () => {
+    const brief = buildCalendarWorkspaceBrief({
+      selectedLabel: "Today",
+      selectedEventCount: 0,
+      totalEventCount: 0,
+      overdueCount: 0,
+    });
+    expect(brief.status).toBe("Today is clear.");
+    expect(brief.situation).toContain("No dated assignments");
+  });
+
+  it("prioritizes past-due calendar evidence", () => {
+    const brief = buildCalendarWorkspaceBrief({
+      selectedLabel: "Today",
+      selectedEventCount: 1,
+      totalEventCount: 4,
+      overdueCount: 2,
+    });
+    expect(brief.status).toContain("recovery move");
+    expect(brief.situation).toContain("2 past-due assignments");
+  });
+
+  it("orients the law school overview around the nearest deadline", () => {
+    const brief = buildLawSchoolOverviewWorkspaceBrief({
+      schoolCount: 3,
+      scholarshipCount: 2,
+      milestoneCount: 4,
+      nextDeadlineLabel: "State Law — application due",
+    });
+    expect(brief.status).toBe("Next deadline identified.");
+    expect(brief.situation).toContain("State Law");
+  });
+
+  it("omits empty overview categories without breaking count grammar", () => {
+    const brief = buildLawSchoolOverviewWorkspaceBrief({
+      schoolCount: 0,
+      scholarshipCount: 0,
+      milestoneCount: 12,
+      nextDeadlineLabel: null,
+    });
+    expect(brief.situation).toBe("12 milestones are on record, with no upcoming deadline identified.");
+  });
+
+  it("does not claim a school field exists without schools", () => {
+    expect(buildSchoolsWorkspaceBrief({ schoolCount: 0, prioritizedCount: 0, activeCount: 0 }).status)
+      .toBe("School field not established.");
+  });
+
+  it("distinguishes a research queue from active applications", () => {
+    const brief = buildSchoolApplicationsWorkspaceBrief({ schoolCount: 3, activeApplicationCount: 0, decisionCount: 0 });
+    expect(brief.status).toBe("Research queue established.");
+  });
+
+  it("backs scholarship urgency with real upcoming deadlines", () => {
+    const brief = buildScholarshipsWorkspaceBrief({ scholarshipCount: 4, activeCount: 2, upcomingDeadlineCount: 1 });
+    expect(brief.status).toBe("Funding deadlines are active.");
+    expect(brief.situation).toContain("1 upcoming deadline");
+  });
+
+  it("names the missing current step on a mapped timeline", () => {
+    const brief = buildTimelineWorkspaceBrief({ milestoneCount: 5, inProgressCount: 0, completedCount: 2 });
+    expect(brief.status).toBe("Roadmap mapped. Current step unassigned.");
+  });
+
+  it("does not call a document record retrievable without source links", () => {
+    const brief = buildDocumentsWorkspaceBrief({ documentCount: 3, linkedSourceCount: 1, schoolLinkedCount: 2 });
+    expect(brief.status).toBe("Dossier in assembly.");
+    expect(brief.situation).toContain("2 do not yet have a source link");
   });
 });

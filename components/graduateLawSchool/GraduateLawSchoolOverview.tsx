@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Calendar, CircleDollarSign, School, Target } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { cn, formatDateOnly } from "@/lib/utils";
 import { PRIORITY_LABEL, STATUS_LABEL } from "@/components/graduateLawSchool/SchoolBadges";
 import { remainingToGoal } from "@/lib/lsat";
+import { buildLawSchoolOverviewWorkspaceBrief } from "@/lib/workspaceBriefs";
 import type { LawSchool, LawSchoolPriority, LawSchoolStatus, Milestone, Scholarship } from "@/types/database.types";
 
 interface DeadlineItem {
@@ -91,13 +92,21 @@ export function GraduateLawSchoolOverview({
   const byStatus = Object.keys(STATUS_LABEL) as LawSchoolStatus[];
   const byPriority = Object.keys(PRIORITY_LABEL) as LawSchoolPriority[];
   const gap = remainingToGoal(lsatLatestScore, lsatGoalScore);
+  const brief = buildLawSchoolOverviewWorkspaceBrief({
+    schoolCount: schools.length,
+    scholarshipCount: scholarships.length,
+    milestoneCount: milestones.length,
+    nextDeadlineLabel: deadlines[0]?.label ?? null,
+  });
 
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow="GRADUATE & LAW SCHOOL"
-        title="Overview"
-        subtitle="Schools, LSAT prep, scholarships, and the roadmap to law school — all in one place."
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${schools.length} schools · ${milestones.length} milestones`}
       />
 
       <div className="space-y-8 px-4 py-6 md:px-8">

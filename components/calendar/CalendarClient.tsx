@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { addMonths, format, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { MonthGrid } from "@/components/calendar/MonthGrid";
 import { EVENT_DOT_CLASS, EVENT_TYPE_LABEL, EVENT_TYPE_ORDER } from "@/components/calendar/eventStyles";
 import { cn } from "@/lib/utils";
 import { parseDateKey, type CalendarEvent } from "@/lib/calendar";
+import { buildCalendarWorkspaceBrief } from "@/lib/workspaceBriefs";
 
 export function CalendarClient({
   events,
@@ -25,13 +26,23 @@ export function CalendarClient({
     type,
     events: selectedEvents.filter((event) => event.type === type),
   })).filter((group) => group.events.length > 0);
+  const selectedLabel = format(parseDateKey(selectedDate), "MMMM d");
+  const overdueCount = events.filter(({ overdue }) => overdue).length;
+  const brief = buildCalendarWorkspaceBrief({
+    selectedLabel,
+    selectedEventCount: selectedEvents.length,
+    totalEventCount: events.length,
+    overdueCount,
+  });
 
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow={eyebrow}
-        title="Your timeline"
-        subtitle="Assignments, certification exams, and networking events — all in one place."
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${events.length} dated item${events.length === 1 ? "" : "s"}`}
       />
 
       <div className="mx-auto w-full max-w-[1120px] space-y-4 px-4 py-6 md:px-8 lg:py-8">

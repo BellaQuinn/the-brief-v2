@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { SchoolCard } from "@/components/graduateLawSchool/SchoolCard";
 import { SchoolForm } from "@/components/graduateLawSchool/SchoolForm";
 import { PRIORITY_LABEL, STATUS_LABEL } from "@/components/graduateLawSchool/SchoolBadges";
+import { buildSchoolsWorkspaceBrief } from "@/lib/workspaceBriefs";
 import type { LawSchool } from "@/types/database.types";
 
 function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
@@ -24,18 +25,22 @@ export function SchoolsClient({ initialSchools }: { initialSchools: LawSchool[] 
   const filtered = schools.filter(
     (s) => (!statusFilter || s.status === statusFilter) && (!priorityFilter || s.priority === priorityFilter)
   );
+  const prioritizedCount = schools.filter(({ priority }) => priority != null).length;
+  const activeCount = schools.filter(({ status }) => status !== "researching").length;
+  const brief = buildSchoolsWorkspaceBrief({ schoolCount: schools.length, prioritizedCount, activeCount });
 
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow="GRADUATE & LAW SCHOOL // SCHOOLS"
-        title="Schools"
-        hideDots
-        subtitle={`${schools.length} school${schools.length === 1 ? "" : "s"} tracked`}
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${schools.length} tracked · ${prioritizedCount} prioritized`}
         action={
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
+            className="flex items-center gap-1.5 border border-accent/30 bg-accent-dim/50 px-3 py-2 text-xs font-medium text-accent-bright transition-colors hover:border-accent/60 hover:bg-accent-dim"
           >
             <Plus className="h-3.5 w-3.5" />
             Add school

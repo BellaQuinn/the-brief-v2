@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { Plus } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { Modal } from "@/components/ui/Modal";
 import { ScholarshipCard } from "@/components/graduateLawSchool/ScholarshipCard";
 import { ScholarshipForm } from "@/components/graduateLawSchool/ScholarshipForm";
+import { buildScholarshipsWorkspaceBrief } from "@/lib/workspaceBriefs";
 import type { LawSchool, Scholarship } from "@/types/database.types";
 
 function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
@@ -22,18 +24,29 @@ export function ScholarshipsClient({
 }) {
   const [scholarships, setScholarships] = useState(initialScholarships);
   const [adding, setAdding] = useState(false);
+  const today = format(new Date(), "yyyy-MM-dd");
+  const activeCount = scholarships.filter(({ status }) => ["eligible", "applying", "applied"].includes(status)).length;
+  const upcomingDeadlineCount = scholarships.filter(
+    ({ deadline, status }) => deadline != null && deadline >= today && !["awarded", "declined"].includes(status)
+  ).length;
+  const brief = buildScholarshipsWorkspaceBrief({
+    scholarshipCount: scholarships.length,
+    activeCount,
+    upcomingDeadlineCount,
+  });
 
   return (
     <div>
-      <WorkspaceHeader
+      <WorkspaceBrief
         eyebrow="GRADUATE & LAW SCHOOL // SCHOLARSHIPS"
-        title="Scholarships"
-        hideDots
-        subtitle={`${scholarships.length} scholarship${scholarships.length === 1 ? "" : "s"} tracked`}
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${scholarships.length} tracked · ${upcomingDeadlineCount} upcoming`}
         action={
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
+            className="flex items-center gap-1.5 border border-accent/30 bg-accent-dim/50 px-3 py-2 text-xs font-medium text-accent-bright transition-colors hover:border-accent/60 hover:bg-accent-dim"
           >
             <Plus className="h-3.5 w-3.5" />
             Add scholarship
