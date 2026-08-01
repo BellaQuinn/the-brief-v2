@@ -51,6 +51,50 @@
   .eyebrow {
     @apply font-mono text-[11px] uppercase tracking-eyebrow text-ink-tertiary;
   }
+
+  /* Instrument frame — open corner-bracket marks instead of a full
+     border, so an instrument module reads as equipment rather than a
+     dashboard card. Color set per instance via --corner (four variants
+     below). Not expressible as a plain Tailwind utility, same reasoning
+     as .eyebrow above. */
+  .instrument-frame {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.015);
+    background-image: linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0);
+    background-size: 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px;
+    background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right,
+      bottom right;
+    background-repeat: no-repeat;
+  }
+  .instrument-frame-seal {
+    --corner: theme("colors.seal.DEFAULT");
+  }
+  .instrument-frame-accent {
+    --corner: theme("colors.accent.DEFAULT");
+  }
+  .instrument-frame-signal {
+    --corner: theme("colors.signal.DEFAULT");
+  }
+  .instrument-frame-neutral {
+    --corner: theme("colors.border.strong");
+  }
+
+  /* Smaller reticle marks for the active sidebar nav icon — ties the
+     sidebar's visual language to the instrument modules above. */
+  .nav-frame-active {
+    background-image: linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0);
+    background-size: 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px;
+    background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right,
+      bottom right;
+    background-repeat: no-repeat;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

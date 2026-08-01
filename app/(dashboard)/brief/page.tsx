@@ -1,14 +1,17 @@
 import { addDays, endOfDay, format } from "date-fns";
-import { AlertCircle, Award, Briefcase } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { MissionBrief } from "@/components/brief/MissionBrief";
 import { FocusList } from "@/components/brief/FocusList";
-import { StatTile } from "@/components/brief/StatTile";
-import { GpaCard } from "@/components/brief/GpaCard";
+import { TicketModule } from "@/components/brief/instruments/TicketModule";
+import { TrackerModule } from "@/components/brief/instruments/TrackerModule";
+import { GaugeModule } from "@/components/brief/instruments/GaugeModule";
+import { honorsRangeLabel } from "@/components/brief/GpaCard";
 import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
 import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/academicStanding/build";
 import { buildMissionBrief } from "@/lib/missionBrief";
-import type { AssignmentWithContext } from "@/types/database.types";
+import { groupApplicationPipeline } from "@/lib/applicationPipeline";
+import { nextCertificationExam } from "@/lib/certifications";
+import type { Application, AssignmentWithContext, Certification } from "@/types/database.types";
 
 function greeting(hour: number): string {
   if (hour < 12) return "Good morning";
@@ -52,17 +55,14 @@ export default async function BriefPage() {
     (a) => a.due_date && new Date(a.due_date) > endOfDay(now)
   );
 
-  const [{ count: openApplications }, { count: activeCerts }, { data: activeDegree }] = await Promise.all([
-    supabase
-      .from("applications")
-      .select("*", { count: "exact", head: true })
-      .in("status", ["applied", "phone_screen", "interviewing"]),
-    supabase
-      .from("certifications")
-      .select("*", { count: "exact", head: true })
-      .in("status", ["studying", "scheduled"]),
-    // Same active-degree rule as the due-today query above — the GPA card
-    // reflects "am I on track right now," not every degree on file.
+  // Full rows, not just counts — the instrument row groups applications
+  // into a real pipeline and reads the nearest certification exam date,
+  // neither of which a head-count query can answer.
+  const [{ data: applications }, { data: certifications }, { data: activeDegree }] = await Promise.all([
+    supabase.from("applications").select("*").in("status", ["saved", "applied", "phone_screen", "interviewing", "offer"]),
+    supabase.from("certifications").select("*").in("status", ["studying", "scheduled"]),
+    // Same active-degree rule as the due-today query above — the GPA
+    // gauge reflects "am I on track right now," not every degree on file.
     supabase
       .from("degrees")
       .select("*, terms(*, courses(*, assignments(*)))")
@@ -71,11 +71,19 @@ export default async function BriefPage() {
       .maybeSingle(),
   ]);
 
+  const typedApplications = (applications as Application[]) ?? [];
+  const typedCertifications = (certifications as Certification[]) ?? [];
+  const pipeline = groupApplicationPipeline(typedApplications);
+  const openApplications = pipeline.saved + pipeline.applied + pipeline.interviewing + pipeline.offer;
+  const nextExam = nextCertificationExam(typedCertifications);
+
   const typedActiveDegree = activeDegree as DegreeWithFullTerms | null;
   const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
+  const cumulativeGpa = standing?.cumulativeGpa.gpa ?? null;
+  const gpaCaption = standing ? honorsRangeLabel(standing.termGpa?.gpa ?? null) ?? "Cumulative GPA" : null;
 
   const firstName = profile?.first_name ?? null;
-  const missionBrief = buildMissionBrief(today, upcoming, openApplications ?? 0, activeCerts ?? 0);
+  const missionBrief = buildMissionBrief(today, upcoming, openApplications, typedCertifications.length);
 
   return (
     <div>
@@ -87,22 +95,35 @@ export default async function BriefPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 px-4 pt-8 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
-        <StatTile
+      <div className="flex flex-wrap items-stretch gap-4 px-4 pt-8 md:px-8">
+        <TicketModule
           label="Due today"
-          value={String(today.length)}
-          tone={today.length > 0 ? "atRisk" : "onTrack"}
-          icon={AlertCircle}
+          value={today.length}
+          unit="due"
+          caption={today.length === 0 ? "Nothing due today." : "See today's focus below."}
+          attention={today.length > 0}
         />
-        <StatTile label="Open applications" value={String(openApplications ?? 0)} icon={Briefcase} />
-        <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} icon={Award} />
+        <TrackerModule pipeline={pipeline} />
         {standing && (
-          <GpaCard
-            cumulativeGpa={standing.cumulativeGpa.gpa}
-            termGpa={standing.termGpa?.gpa ?? null}
-            graduationForecast={standing.graduationForecast}
+          <GaugeModule
+            label="Standing"
+            value={cumulativeGpa !== null ? cumulativeGpa.toFixed(2) : "—"}
+            unit="gpa"
+            caption={gpaCaption ?? "Not available yet"}
+            fraction={cumulativeGpa !== null ? cumulativeGpa / 4 : 0}
+            color="signal"
+            empty={cumulativeGpa === null}
           />
         )}
+        <GaugeModule
+          label="Monitoring"
+          value={nextExam ? String(nextExam.daysUntil) : "—"}
+          unit="days"
+          caption={nextExam ? nextExam.name : "No exam scheduled"}
+          fraction={nextExam ? Math.max(0, 1 - nextExam.daysUntil / 90) : 0}
+          color="accent"
+          empty={!nextExam}
+        />
       </div>
 
       <section className="px-4 pt-8 md:px-8">
