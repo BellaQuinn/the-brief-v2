@@ -1,11 +1,14 @@
 import type { Config } from "tailwindcss";
 
 // ============================================================================
-// THE BRIEF — Design tokens
+// THE BRIEF — Design System 2.0: Foundation
 //
-// Direction: full retro CRT terminal. Green phosphor on black, amber
-// reserved as the one "seal" accent (priority flags, active nav rail).
-// Monospace everywhere — there is no separate display/body face anymore.
+// Direction: intelligence console, not terminal emulator. Neutral white/gray
+// carries most of the UI; green is a status signal (on-track/progress/
+// success), not a default interactive color; mono type is reserved for
+// eyebrows, system messages, and command-line moments rather than every
+// string in the app. See .claude/plans (Design System 2.0) for the full
+// philosophy this token set is built against.
 // ============================================================================
 
 const config: Config = {
@@ -14,48 +17,58 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#000000",
+        background: "#050506",
         surface: {
-          DEFAULT: "#050A05",
-          raised: "#081006",
-          overlay: "#0C1608",
+          DEFAULT: "#0A0A0B",
+          raised: "#111113",
+          overlay: "#17171A",
         },
         border: {
-          DEFAULT: "#164016",
-          subtle: "#0C260C",
-          strong: "#1F5C1F",
+          DEFAULT: "rgba(255,255,255,0.08)",
+          subtle: "rgba(255,255,255,0.05)",
+          strong: "rgba(255,255,255,0.16)",
         },
         ink: {
-          primary: "#33FF33",
-          secondary: "#2BB82B",
-          tertiary: "#1C7A1C",
+          primary: "#F2F3F5",
+          secondary: "#9CA3AF",
+          tertiary: "#5B6472",
         },
+        // Status signal — on-track, progress, success. No longer the
+        // default interactive/link color.
         signal: {
-          DEFAULT: "#33FF33",
-          dim: "#123312",
-          bright: "#7CFF7C",
+          DEFAULT: "#10B981",
+          dim: "#062B21",
+          bright: "#34D399",
         },
+        // Priority/urgency accent.
         seal: {
-          DEFAULT: "#FFB000",
-          dim: "#5C3D00",
-          bright: "#FFCF59",
+          DEFAULT: "#F59E0B",
+          dim: "#3A2A0A",
+          bright: "#FBBF24",
+        },
+        // Secondary accent — informational, not primary CTA.
+        accent: {
+          DEFAULT: "#3B82F6",
+          dim: "#0B1B33",
+          bright: "#60A5FA",
         },
         status: {
-          onTrack: "#33FF33",
-          atRisk: "#FF4D4D",
-          neutral: "#2BB82B",
+          onTrack: "#10B981",
+          atRisk: "#EF4444",
+          neutral: "#71717A",
         },
       },
       fontFamily: {
-        display: ["var(--font-mono)", "monospace"],
-        sans: ["var(--font-mono)", "monospace"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
       letterSpacing: {
         eyebrow: "0.14em",
       },
       boxShadow: {
-        card: "0 0 0 1px rgba(51,255,51,0.05) inset",
+        card: "0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)",
+        elevated: "0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)",
       },
       keyframes: {
         "scan-sweep": {
@@ -64,15 +77,20 @@ const config: Config = {
         },
         "pulse-signal": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.4" },
+          "50%": { opacity: "0.5" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },
       animation: {
         "scan-sweep": "scan-sweep 2.4s ease-in-out infinite",
-        "pulse-signal": "pulse-signal 2s ease-in-out infinite",
+        "pulse-signal": "pulse-signal 2.4s ease-in-out infinite",
+        "fade-in": "fade-in 0.4s ease-out",
       },
       borderRadius: {
-        card: "3px",
+        card: "10px",
       },
     },
   },

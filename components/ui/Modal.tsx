@@ -25,17 +25,18 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-6"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
+            className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-6 shadow-elevated"
+            initial={{ opacity: 0, scale: 0.97, y: 4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 4 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">

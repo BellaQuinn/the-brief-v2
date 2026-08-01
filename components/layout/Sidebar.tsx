@@ -69,6 +69,15 @@ export function Sidebar({ user }: { user: Pick<User, "first_name" | "last_name" 
         })}
       </nav>
 
+      {/* System status — ambient console flavor, not a computed status */}
+      <div className="mx-3 mb-3 rounded-lg border border-border-subtle bg-surface-raised/40 px-3 py-2.5">
+        <p className="eyebrow mb-1.5 !text-[9px]">System</p>
+        <div className="flex items-center gap-1.5 text-xs text-ink-secondary">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-signal animate-pulse-signal" />
+          Ready, Operator.
+        </div>
+      </div>
+
       {/* Account footer */}
       <div className="border-t border-border-subtle p-3">
         <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">

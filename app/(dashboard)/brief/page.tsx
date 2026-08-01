@@ -1,4 +1,5 @@
-import { addDays, format, startOfDay, endOfDay } from "date-fns";
+import { addDays, endOfDay, format } from "date-fns";
+import { AlertCircle, Award, Briefcase } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
 import { FocusList } from "@/components/brief/FocusList";
@@ -8,10 +9,23 @@ import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
 import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/academicStanding/build";
 import type { AssignmentWithContext } from "@/types/database.types";
 
+function greeting(hour: number): string {
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 export default async function BriefPage() {
   const supabase = await createClient();
   const now = new Date();
   const weekOut = addDays(now, 7);
+
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: profile } = authUser
+    ? await supabase.from("users").select("first_name").eq("id", authUser.id).single()
+    : { data: null };
 
   // Assignments are queried directly here — never duplicated or cached
   // separately. Academics and any future calendar view read from the same
@@ -59,11 +73,14 @@ export default async function BriefPage() {
   const typedActiveDegree = activeDegree as DegreeWithFullTerms | null;
   const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
 
+  const firstName = profile?.first_name ?? null;
+
   return (
     <div>
       <WorkspaceHeader
-        eyebrow={`Briefing // ${format(now, "EEEE, MMMM d")}`}
-        title="What deserves your attention today"
+        eyebrow={format(now, "EEEE, MMMM d")}
+        title={firstName ? `${greeting(now.getHours())}, ${firstName}.` : `${greeting(now.getHours())}.`}
+        subtitle="Here's what deserves your attention today."
       />
 
       <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
@@ -71,9 +88,10 @@ export default async function BriefPage() {
           label="Due today"
           value={String(today.length)}
           tone={today.length > 0 ? "atRisk" : "onTrack"}
+          icon={AlertCircle}
         />
-        <StatTile label="Open applications" value={String(openApplications ?? 0)} />
-        <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} />
+        <StatTile label="Open applications" value={String(openApplications ?? 0)} icon={Briefcase} />
+        <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} icon={Award} />
         {standing && (
           <GpaCard
             cumulativeGpa={standing.cumulativeGpa.gpa}

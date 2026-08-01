@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { GraduateLawSchoolOverview } from "@/components/graduateLawSchool/GraduateLawSchoolOverview";
+import { sortMilestones } from "@/components/graduateLawSchool/MilestoneRoadmap";
 import { latestScore } from "@/lib/lsat";
 import type { LawSchool, LsatPracticeTest, Milestone, Scholarship } from "@/types/database.types";
 
@@ -42,6 +43,7 @@ export default async function GraduateLawSchoolOverviewPage() {
       schools={typedSchools}
       scholarships={typedScholarships}
       deadlines={deadlines}
+      milestones={sortMilestones(typedMilestones)}
       lsatGoalScore={profile?.lsat_goal_score ?? null}
       lsatLatestScore={latestScore((practiceTests as LsatPracticeTest[]) ?? [])}
     />

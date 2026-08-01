@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { Calendar, CircleDollarSign, School, Target } from "lucide-react";
 import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
-import { formatDateOnly } from "@/lib/utils";
+import { cn, formatDateOnly } from "@/lib/utils";
 import { PRIORITY_LABEL, STATUS_LABEL } from "@/components/graduateLawSchool/SchoolBadges";
 import { remainingToGoal } from "@/lib/lsat";
-import type { LawSchool, LawSchoolPriority, LawSchoolStatus, Scholarship } from "@/types/database.types";
+import type { LawSchool, LawSchoolPriority, LawSchoolStatus, Milestone, Scholarship } from "@/types/database.types";
 
 interface DeadlineItem {
   label: string;
@@ -11,11 +12,63 @@ interface DeadlineItem {
   href: string;
 }
 
-function StatBlock({ label, value }: { label: string; value: string }) {
+function StatBlock({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="rounded-card border border-border bg-surface px-4 py-3">
-      <p className="eyebrow mb-1.5">{label}</p>
-      <p className="font-display text-lg font-medium text-ink-primary">{value}</p>
+    <div className="rounded-card border border-border bg-surface px-4 py-3 shadow-card transition-shadow hover:shadow-elevated">
+      <div className="mb-1.5 flex items-start justify-between gap-2">
+        <p className="eyebrow">{label}</p>
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-surface-raised text-ink-tertiary">
+          <Icon className="h-3.5 w-3.5" />
+        </div>
+      </div>
+      <p className="font-display text-lg font-semibold text-ink-primary">{value}</p>
+    </div>
+  );
+}
+
+// Compact, read-only roadmap preview — the full editable version with
+// add/edit/delete lives on the Timeline tab (MilestoneRoadmap.tsx).
+function MilestoneStepper({ milestones }: { milestones: Milestone[] }) {
+  const preview = milestones.slice(0, 6);
+
+  if (preview.length === 0) {
+    return (
+      <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
+        <p className="text-sm text-ink-secondary">No milestones yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-card border border-border bg-surface p-4 shadow-card">
+      <ol>
+        {preview.map((m, i) => {
+          const isLast = i === preview.length - 1;
+          const isCompleted = m.status === "completed";
+          const isCurrent = m.status === "in_progress";
+          return (
+            <li key={m.id} className="flex gap-3">
+              <div className="flex flex-col items-center">
+                <span
+                  className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                    isCompleted && "border-signal bg-signal",
+                    isCurrent && "border-accent bg-background",
+                    !isCompleted && !isCurrent && "border-border-strong bg-background"
+                  )}
+                />
+                {!isLast && <span className={cn("w-px flex-1", isCompleted ? "bg-signal/40" : "bg-border-strong")} />}
+              </div>
+              <div className={cn("min-w-0 pb-4", isLast && "pb-0")}>
+                <p className={cn("truncate text-sm", isCurrent ? "font-medium text-ink-primary" : "text-ink-secondary")}>
+                  {m.title}
+                </p>
+                {isCurrent && <p className="text-xs text-accent">In progress</p>}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -24,12 +77,14 @@ export function GraduateLawSchoolOverview({
   schools,
   scholarships,
   deadlines,
+  milestones,
   lsatGoalScore,
   lsatLatestScore,
 }: {
   schools: LawSchool[];
   scholarships: Scholarship[];
   deadlines: DeadlineItem[];
+  milestones: Milestone[];
   lsatGoalScore: number | null;
   lsatLatestScore: number | null;
 }) {
@@ -42,16 +97,15 @@ export function GraduateLawSchoolOverview({
       <WorkspaceHeader
         eyebrow="GRADUATE & LAW SCHOOL"
         title="Overview"
-        hideDots
         subtitle="Schools, LSAT prep, scholarships, and the roadmap to law school — all in one place."
       />
 
       <div className="space-y-8 px-4 py-6 md:px-8">
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatBlock label="Schools tracked" value={String(schools.length)} />
-          <StatBlock label="Scholarships tracked" value={String(scholarships.length)} />
-          <StatBlock label="LSAT goal gap" value={gap === null ? "—" : `${gap} pts`} />
-          <StatBlock label="Upcoming deadlines" value={String(deadlines.length)} />
+          <StatBlock label="Schools tracked" value={String(schools.length)} icon={School} />
+          <StatBlock label="Scholarships tracked" value={String(scholarships.length)} icon={CircleDollarSign} />
+          <StatBlock label="LSAT goal gap" value={gap === null ? "—" : `${gap} pts`} icon={Target} />
+          <StatBlock label="Upcoming deadlines" value={String(deadlines.length)} icon={Calendar} />
         </section>
 
         <section>
@@ -88,24 +142,36 @@ export function GraduateLawSchoolOverview({
           </div>
         </section>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Upcoming deadlines</h2>
-          {deadlines.length === 0 ? (
-            <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
-              <p className="text-sm text-ink-secondary">Nothing coming up.</p>
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div>
+            <h2 className="mb-3 text-sm font-medium text-ink-primary">Upcoming deadlines</h2>
+            {deadlines.length === 0 ? (
+              <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
+                <p className="text-sm text-ink-secondary">Nothing coming up.</p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-border-subtle rounded-card border border-border bg-surface shadow-card">
+                {deadlines.slice(0, 5).map((d, i) => (
+                  <li key={i}>
+                    <Link href={d.href} className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-surface-raised">
+                      <span className="text-sm text-ink-primary">{d.label}</span>
+                      <span className="font-mono text-xs text-ink-tertiary">{formatDateOnly(d.date)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-ink-primary">Milestone roadmap</h2>
+              <Link href="/academics/graduate-law-school/timeline" className="text-xs text-accent hover:text-accent-bright">
+                View full timeline
+              </Link>
             </div>
-          ) : (
-            <ul className="divide-y divide-border-subtle rounded-card border border-border bg-surface">
-              {deadlines.slice(0, 5).map((d, i) => (
-                <li key={i}>
-                  <Link href={d.href} className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-surface-raised">
-                    <span className="text-sm text-ink-primary">{d.label}</span>
-                    <span className="font-mono text-xs text-ink-tertiary">{formatDateOnly(d.date)}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+            <MilestoneStepper milestones={milestones} />
+          </div>
         </section>
 
         <section>

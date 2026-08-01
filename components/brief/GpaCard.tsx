@@ -25,7 +25,7 @@ export function GpaCard({
   return (
     <Link
       href={href}
-      className="block rounded-card border border-border bg-surface px-4 py-3.5 transition-colors hover:border-border-strong"
+      className="block rounded-card border border-border bg-surface px-4 py-3.5 shadow-card transition-shadow hover:shadow-elevated"
     >
       <p className="eyebrow mb-2">Current GPA</p>
       {cumulativeGpa !== null ? (

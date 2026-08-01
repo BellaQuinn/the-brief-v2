@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --font-mono: "IBM Plex Mono", monospace;
+    --font-sans: "Inter", system-ui, sans-serif;
   }
 
   * {
@@ -16,41 +17,17 @@
   }
 
   body {
-    @apply bg-background text-ink-primary font-mono antialiased;
-    position: relative;
-    text-shadow: 0 0 1px currentColor;
-    animation: crt-flicker 6s steps(1, end) infinite;
-  }
-
-  @keyframes crt-flicker {
-    0%, 92%, 93%, 95%, 96%, 100% { filter: brightness(1); }
-    92.5% { filter: brightness(0.96); }
-    95.5% { filter: brightness(0.985); }
-  }
-
-  /* CRT scanlines — fixed overlay above all content, doesn't block input */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.15) 0px,
-      rgba(0, 0, 0, 0.15) 1px,
-      transparent 1px,
-      transparent 3px
-    );
+    @apply bg-background text-ink-primary font-sans antialiased;
   }
 
   ::selection {
     @apply bg-signal/30 text-ink-primary;
   }
 
-  /* Visible keyboard focus everywhere — no exceptions */
+  /* Visible keyboard focus everywhere — no exceptions. Accent (blue), not
+     signal (green) — green stays reserved for status/success meaning. */
   :focus-visible {
-    outline: 2px solid theme("colors.signal.DEFAULT");
+    outline: 2px solid theme("colors.accent.DEFAULT");
     outline-offset: 2px;
     border-radius: 4px;
   }
