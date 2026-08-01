@@ -100,7 +100,7 @@ export default async function BriefPage() {
 
   return (
     <div>
-      <div className="px-4 pt-8 md:px-8">
+      <div className="brief-header-treatment border-b border-border-subtle px-4 pb-8 pt-8 md:px-8">
         <MissionBrief
           data={missionBrief}
           dayLabel={format(now, "EEEE, MMMM d")}
