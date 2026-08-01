@@ -14,25 +14,34 @@ const TABS: { path: string | null; label: string }[] = [
   { path: "/courses", label: "Courses" },
   { path: "/assignments", label: "Assignments" },
   { path: "/graduate-law-school", label: "Graduate & Law School" },
-  { path: null, label: "Documents" },
+  { path: "/documents", label: "Documents" },
 ];
 
 export function AcademicsSubNav({
   basePath,
   includeGraduateLawSchool = true,
+  includeDocuments = true,
 }: {
   basePath: string;
   // Graduate & Law School is private-only (LSAT scores, school-by-school
   // application status) — the Portfolio Preview shell renders this tab as
   // inert instead of linking to a route that doesn't exist there.
   includeGraduateLawSchool?: boolean;
+  // Documents can hold transcripts and financial records — private-only
+  // by design, same reasoning as Graduate & Law School above, not just a
+  // missing route.
+  includeDocuments?: boolean;
 }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex items-center gap-1 overflow-x-auto border-b border-border-subtle bg-surface-raised/60 px-4 md:px-8">
       {TABS.map((tab) => {
-        const path = tab.path === "/graduate-law-school" && !includeGraduateLawSchool ? null : tab.path;
+        const path =
+          (tab.path === "/graduate-law-school" && !includeGraduateLawSchool) ||
+          (tab.path === "/documents" && !includeDocuments)
+            ? null
+            : tab.path;
         const label = tab.label;
         if (path === null) {
           return (

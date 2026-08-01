@@ -50,6 +50,34 @@ export type ScholarshipStatus = "researching" | "eligible" | "applying" | "appli
 export type MilestoneStatus = "upcoming" | "in_progress" | "completed";
 export type DocumentCategory = "essay" | "recommendation" | "transcript" | "financial" | "other";
 
+// Added by database/add_documents.sql — the shared Academic Documents
+// system, distinct from LawSchoolDocument/DocumentCategory above (that one
+// stays law-school-only; this one spans every domain).
+export type AcademicDocumentCategory =
+  | "syllabus"
+  | "notes"
+  | "assignment_submission"
+  | "reference"
+  | "transcript"
+  | "certificate"
+  | "resume"
+  | "cover_letter"
+  | "recommendation"
+  | "financial"
+  | "essay"
+  | "other";
+export type DocumentRelationshipEntityType =
+  | "degree"
+  | "term"
+  | "course"
+  | "assignment"
+  | "certification"
+  | "application"
+  | "law_school"
+  | "scholarship"
+  | "milestone";
+export type DocumentStatus = "active" | "archived";
+
 export interface User {
   id: string;
   first_name: string | null;
@@ -295,6 +323,56 @@ export interface NotificationLogEntry {
 }
 
 // ----------------------------------------------------------------------------
+// Academic Documents — database/add_documents.sql. Shared across every
+// domain (see AcademicDocumentCategory/DocumentRelationshipEntityType
+// above), plus the first real Supabase Storage usage in this app.
+// ----------------------------------------------------------------------------
+export interface DocumentRecord {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  category: AcademicDocumentCategory;
+  status: DocumentStatus;
+  is_favorite: boolean;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  extracted_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentRelationship {
+  id: string;
+  document_id: string;
+  user_id: string;
+  entity_type: DocumentRelationshipEntityType;
+  entity_id: string;
+  created_at: string;
+}
+
+export interface DocumentVersion {
+  id: string;
+  document_id: string;
+  user_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  version_number: number;
+  uploaded_at: string;
+}
+
+export interface DocumentView {
+  id: string;
+  document_id: string;
+  user_id: string;
+  viewed_at: string;
+}
+
+// ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
 // dashboard, calendar, and course views all consume, joined once at the
@@ -324,6 +402,18 @@ export interface TermWithCourses extends Term {
 
 export interface DegreeWithTerms extends Degree {
   terms: TermWithCourses[];
+}
+
+// Documents workspace's list/card view needs both the raw relationship rows
+// (for editing) and a resolved, human-readable label per relationship (for
+// display) — entity_id alone means nothing on screen. Resolution happens at
+// the data layer (app/(dashboard)/academics/documents/page.tsx), not here.
+export interface DocumentRelationshipWithLabel extends DocumentRelationship {
+  label: string;
+}
+
+export interface DocumentWithRelationships extends DocumentRecord {
+  relationships: DocumentRelationshipWithLabel[];
 }
 
 // supabase-js's generic client requires each table to satisfy `GenericTable`
@@ -394,6 +484,30 @@ export interface Database {
         Row: NotificationLogEntry;
         Insert: Partial<NotificationLogEntry>;
         Update: Partial<NotificationLogEntry>;
+        Relationships: [];
+      };
+      documents: {
+        Row: DocumentRecord;
+        Insert: Partial<DocumentRecord>;
+        Update: Partial<DocumentRecord>;
+        Relationships: [];
+      };
+      document_relationships: {
+        Row: DocumentRelationship;
+        Insert: Partial<DocumentRelationship>;
+        Update: Partial<DocumentRelationship>;
+        Relationships: [];
+      };
+      document_versions: {
+        Row: DocumentVersion;
+        Insert: Partial<DocumentVersion>;
+        Update: Partial<DocumentVersion>;
+        Relationships: [];
+      };
+      document_views: {
+        Row: DocumentView;
+        Insert: Partial<DocumentView>;
+        Update: Partial<DocumentView>;
         Relationships: [];
       };
     };

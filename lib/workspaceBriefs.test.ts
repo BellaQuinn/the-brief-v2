@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAcademicDocumentsWorkspaceBrief,
   buildAcademicsWorkspaceBrief,
   buildAcademicStandingWorkspaceBrief,
   buildAssignmentsWorkspaceBrief,
@@ -311,5 +312,24 @@ describe("remaining workspace briefs", () => {
     const brief = buildDocumentsWorkspaceBrief({ documentCount: 3, linkedSourceCount: 1, schoolLinkedCount: 2 });
     expect(brief.status).toBe("Dossier in assembly.");
     expect(brief.situation).toContain("2 do not yet have a source link");
+  });
+});
+
+describe("buildAcademicDocumentsWorkspaceBrief", () => {
+  it("shows an honest empty state with no invented urgency", () => {
+    const brief = buildAcademicDocumentsWorkspaceBrief({ documentCount: 0, unattachedCount: 0, archivedCount: 0 });
+    expect(brief.status).toBe("Repository empty.");
+  });
+
+  it("flags unattached files without calling the whole library disorganized", () => {
+    const brief = buildAcademicDocumentsWorkspaceBrief({ documentCount: 5, unattachedCount: 2, archivedCount: 0 });
+    expect(brief.status).toBe("Some files aren't connected yet.");
+    expect(brief.situation).toContain("2 aren't linked");
+  });
+
+  it("confirms full connection only when every document actually has a link", () => {
+    const brief = buildAcademicDocumentsWorkspaceBrief({ documentCount: 5, unattachedCount: 0, archivedCount: 1 });
+    expect(brief.status).toBe("Repository connected.");
+    expect(brief.situation).toContain("1 archived");
   });
 });

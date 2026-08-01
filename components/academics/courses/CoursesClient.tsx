@@ -7,6 +7,8 @@ import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { AssignmentRow } from "@/components/academics/AssignmentRow";
 import { AssignmentForm } from "@/components/academics/AssignmentForm";
 import { CourseForm } from "@/components/academics/CourseForm";
+import { CourseDocumentsSection } from "@/components/documents/CourseDocumentsSection";
+import type { EntityOptionMap } from "@/components/documents/DocumentRelationshipPicker";
 import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
@@ -14,7 +16,7 @@ import { computeCourseGrade } from "@/lib/academicStanding/grades";
 import { buildCoursesWorkspaceBrief } from "@/lib/workspaceBriefs";
 import { cn } from "@/lib/utils";
 import type { AcademicsActions } from "@/components/academics/AcademicsClient";
-import type { Assignment, Course } from "@/types/database.types";
+import type { Assignment, Course, DocumentWithRelationships } from "@/types/database.types";
 import type { CourseWithFullContext } from "@/app/(dashboard)/academics/courses/page";
 
 const ALL = "all";
@@ -27,8 +29,17 @@ function updateAssignmentsForCourse(
   return courses.map((c) => (c.id === courseId ? { ...c, assignments: update(c.assignments) } : c));
 }
 
-export function CoursesClient({ initialCourses }: { initialCourses: CourseWithFullContext[] }) {
+export function CoursesClient({
+  initialCourses,
+  initialDocuments,
+  entityOptions,
+}: {
+  initialCourses: CourseWithFullContext[];
+  initialDocuments: DocumentWithRelationships[];
+  entityOptions: EntityOptionMap;
+}) {
   const [courses, setCourses] = useState<CourseWithFullContext[]>(initialCourses);
+  const [documents, setDocuments] = useState<DocumentWithRelationships[]>(initialDocuments);
   const [degreeFilter, setDegreeFilter] = useState(ALL);
   const [statusFilter, setStatusFilter] = useState<string>("in_progress");
   const [selectedId, setSelectedId] = useState<string | null>(initialCourses[0]?.id ?? null);
@@ -229,6 +240,14 @@ export function CoursesClient({ initialCourses }: { initialCourses: CourseWithFu
                     <p className="text-sm text-ink-secondary">{selected.notes}</p>
                   </WorkspaceSection>
                 )}
+
+                <CourseDocumentsSection
+                  courseId={selected.id}
+                  courseLabel={selected.course_code ?? selected.course_name}
+                  documents={documents}
+                  entityOptions={entityOptions}
+                  onChange={setDocuments}
+                />
               </>
             )}
           </div>

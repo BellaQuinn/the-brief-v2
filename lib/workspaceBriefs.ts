@@ -544,3 +544,36 @@ export function buildDocumentsWorkspaceBrief({
     directive: "Review the next document required by an active application.",
   };
 }
+
+// The shared Academic Documents system (database/add_documents.sql) —
+// distinct from buildDocumentsWorkspaceBrief above, which stays scoped to
+// Graduate & Law School's own link-tracking table.
+export function buildAcademicDocumentsWorkspaceBrief({
+  documentCount,
+  unattachedCount,
+  archivedCount,
+}: {
+  documentCount: number;
+  unattachedCount: number;
+  archivedCount: number;
+}): WorkspaceBriefData {
+  if (documentCount === 0) {
+    return {
+      status: "Repository empty.",
+      situation: "No files are uploaded yet.",
+      directive: "Upload the first syllabus, transcript, or reference file.",
+    };
+  }
+  if (unattachedCount > 0) {
+    return {
+      status: "Some files aren't connected yet.",
+      situation: `${documentCount} document${documentCount === 1 ? " is" : "s are"} on file; ${unattachedCount} ${unattachedCount === 1 ? "isn't" : "aren't"} linked to a course, degree, or record.`,
+      directive: "Attach the next unlinked file to what it belongs to.",
+    };
+  }
+  return {
+    status: "Repository connected.",
+    situation: `${documentCount} document${documentCount === 1 ? " is" : "s are"} on file, all linked to their coursework or record${archivedCount > 0 ? `; ${archivedCount} archived` : ""}.`,
+    directive: "Search or filter to find what you need.",
+  };
+}
