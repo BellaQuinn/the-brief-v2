@@ -18,7 +18,6 @@ export const metadata: Metadata = {
   title: "The Brief — Mission Control for ambitious nontraditional students",
   description:
     "The Brief reduces the cognitive load of balancing school, work, certifications, and career advancement into one daily briefing.",
-  manifest: "/manifest.json",
   icons: {
     icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
@@ -43,6 +42,17 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        {/*
+          Rendered manually instead of via `metadata.manifest` -- Next
+          always adds crossorigin="use-credentials" to that field's
+          generated <link>, which this static, non-user-specific
+          manifest doesn't need and which iOS's own installability
+          check (separate from a plain fetch()) may not handle the
+          same way a normal page load does.
+        */}
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className={`${monoFont.variable} ${sansFont.variable}`}>
         {children}
       </body>
