@@ -10,6 +10,7 @@ import {
   MoreVertical,
   Pencil,
   RefreshCw,
+  Sparkles,
   Star,
   Trash2,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Modal } from "@/components/ui/Modal";
 import { DocumentForm } from "@/components/documents/DocumentForm";
 import { DocumentReplaceForm } from "@/components/documents/DocumentReplaceForm";
+import { SuggestionReviewModal } from "@/components/documents/SuggestionReviewModal";
 import { deleteDocumentFiles, getSignedDocumentUrl } from "@/lib/documentStorage";
 import { CATEGORY_LABEL, formatFileSize, getFileKind } from "@/lib/documents";
 import { cn } from "@/lib/utils";
@@ -40,10 +42,12 @@ export function DocumentCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [replacing, setReplacing] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const kind = getFileKind(document.mime_type);
   const Icon = kind === "image" ? ImageIcon : FileText;
+  const courseRelationship = document.relationships.find((r) => r.entity_type === "course");
 
   async function toggleFavorite() {
     const { data } = await supabase
@@ -160,6 +164,21 @@ export function DocumentCard({
                       setMenuOpen(false);
                     }}
                   />
+                  {document.category === "syllabus" && (
+                    <MenuItem
+                      icon={Sparkles}
+                      label="Extract assignments"
+                      onClick={() => {
+                        if (!courseRelationship) {
+                          alert("Attach this syllabus to a course first, then extract its assignments.");
+                          setMenuOpen(false);
+                          return;
+                        }
+                        setExtracting(true);
+                        setMenuOpen(false);
+                      }}
+                    />
+                  )}
                   <MenuItem
                     icon={RefreshCw}
                     label="Replace file"
@@ -180,6 +199,12 @@ export function DocumentCard({
           </div>
         </div>
       </div>
+
+      <SuggestionReviewModal
+        documentId={extracting ? document.id : null}
+        courseId={courseRelationship?.entity_id ?? null}
+        onClose={() => setExtracting(false)}
+      />
 
       <Modal open={editing} onClose={() => setEditing(false)} title="Edit document">
         <DocumentForm document={document} entityOptions={entityOptions} onSaved={handleFormSaved} onCancel={() => setEditing(false)} />

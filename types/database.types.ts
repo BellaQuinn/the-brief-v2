@@ -78,6 +78,22 @@ export type DocumentRelationshipEntityType =
   | "milestone";
 export type DocumentStatus = "active" | "archived";
 
+// Added by database/add_document_suggestions.sql — Syllabus Intelligence.
+export type DocumentSuggestionConfidence = "high" | "medium" | "low";
+export type DocumentSuggestionStatus = "pending" | "accepted" | "edited_and_accepted" | "dismissed";
+
+// The proposed assignment fields Claude extracts from a syllabus — mirrors
+// Assignment's own shape, kept loose (all optional except title) since a
+// syllabus rarely states every field explicitly.
+export interface SuggestedAssignment {
+  title: string;
+  type: AssignmentType;
+  due_date: string | null;
+  points_possible: number | null;
+  weight_percent: number | null;
+  priority: PriorityLevel;
+}
+
 export interface User {
   id: string;
   first_name: string | null;
@@ -372,6 +388,19 @@ export interface DocumentView {
   viewed_at: string;
 }
 
+export interface DocumentSuggestion {
+  id: string;
+  document_id: string;
+  user_id: string;
+  recommendation: SuggestedAssignment;
+  reason: string;
+  evidence: string | null;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
+}
+
 // ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
@@ -508,6 +537,12 @@ export interface Database {
         Row: DocumentView;
         Insert: Partial<DocumentView>;
         Update: Partial<DocumentView>;
+        Relationships: [];
+      };
+      document_suggestions: {
+        Row: DocumentSuggestion;
+        Insert: Partial<DocumentSuggestion>;
+        Update: Partial<DocumentSuggestion>;
         Relationships: [];
       };
     };
