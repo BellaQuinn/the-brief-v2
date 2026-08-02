@@ -433,7 +433,7 @@ async function main() {
       fileName: "Alex_Rivera_Resume.txt",
       mimeType: "text/plain",
       buffer: resumeText,
-      relationships: [],
+      relationships: [{ entity_type: "degree", entity_id: bsDegree.id }],
     },
     {
       title: "Financial Aid Award Letter",
