@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchDocumentsWorkspaceData } from "@/lib/documentsData.server";
 import { DocumentsClient } from "@/components/documents/DocumentsClient";
 
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
+
 // Every entity a document can attach to, across every degree — same
 // "everything on file" scope as Assignments/Courses/Calendar, since a
 // student needs to find an old syllabus regardless of which degree or

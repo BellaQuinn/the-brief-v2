@@ -3,6 +3,12 @@ import { fetchDocumentsWorkspaceData } from "@/lib/documentsData.server";
 import { CoursesClient } from "@/components/academics/courses/CoursesClient";
 import type { Assignment, Course, Degree, Term } from "@/types/database.types";
 
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
+
 export interface CourseWithFullContext extends Course {
   assignments: Assignment[];
   term: Term & { degree: Degree };

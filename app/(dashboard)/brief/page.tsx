@@ -15,6 +15,12 @@ import { computeMomentum } from "@/lib/momentum";
 import { operatorDayLabel, operatorGreeting } from "@/lib/operatorTime";
 import type { Application, Assignment, AssignmentWithContext, Certification } from "@/types/database.types";
 
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
+
 export default async function BriefPage() {
   const supabase = await createClient();
   const now = new Date();
