@@ -64,6 +64,7 @@ export function CertificationStudyPlanReviewModal({
       status: "upcoming",
       progress: 0,
       linked_href: "/career",
+      user_id: (await supabase.auth.getUser()).data.user!.id,
     });
     if (insertError) {
       setLocalError(insertError.message);
