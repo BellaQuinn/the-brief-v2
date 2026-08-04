@@ -5,17 +5,38 @@ import { Pencil } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { LsatGoalForm, type LsatGoals } from "@/components/graduateLawSchool/LsatGoalForm";
-import { daysUntilTest, highestScore, improvement, latestScore, remainingToGoal } from "@/lib/lsat";
-import { formatDateOnly } from "@/lib/utils";
-import type { LsatPracticeTest } from "@/types/database.types";
+import { daysUntilTest, highestScore, improvement, latestScore, remainingToGoal, sectionAverages } from "@/lib/lsat";
+import { formatDateOnly, cn } from "@/lib/utils";
+import type { LsatGoalCheckpoint, LsatPracticeTest } from "@/types/database.types";
+
+// Shared date-based x-axis so real test results and planned checkpoints
+// plot on one honest timeline -- the previous version spaced test points
+// by index, which silently misrepresented uneven gaps between sittings.
+function xForDate(dateStr: string, range: { min: number; max: number } | null): number {
+  if (!range || range.min === range.max) return 360;
+  const t = new Date(dateStr).getTime();
+  return 48 + ((t - range.min) / (range.max - range.min)) * 624;
+}
+
+function yForScore(score: number): number {
+  return 20 + (1 - (score - 120) / 60) * 132;
+}
+
+const SECTION_LABEL: Record<"logicalReasoning" | "readingComprehension" | "analyticalReasoning", string> = {
+  logicalReasoning: "Logical Reasoning",
+  readingComprehension: "Reading Comprehension",
+  analyticalReasoning: "Analytical Reasoning",
+};
 
 export function LsatStatsOverview({
   goals,
   practiceTests,
+  checkpoints,
   onGoalsSaved,
 }: {
   goals: LsatGoals;
   practiceTests: LsatPracticeTest[];
+  checkpoints: LsatGoalCheckpoint[];
   onGoalsSaved: (goals: LsatGoals) => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -25,17 +46,43 @@ export function LsatStatsOverview({
   const improvementValue = improvement(latest, goals.lsat_diagnostic_score);
   const remaining = remainingToGoal(latest, goals.lsat_goal_score);
   const daysUntil = daysUntilTest(goals.lsat_planned_test_date);
+  const sections = sectionAverages(practiceTests);
+  const hasSectionData =
+    sections.logicalReasoning.average != null ||
+    sections.readingComprehension.average != null ||
+    sections.analyticalReasoning.average != null;
 
   const scoredTests = [...practiceTests]
     .filter((test): test is LsatPracticeTest & { scaled_score: number } => test.scaled_score != null)
     .sort((a, b) => a.test_date.localeCompare(b.test_date));
-  const chartPoints = scoredTests.map((test, index) => ({
-    test,
-    x: scoredTests.length === 1 ? 360 : 48 + (index / (scoredTests.length - 1)) * 624,
-    y: 20 + (1 - (test.scaled_score - 120) / 60) * 132,
-  }));
+
+  const allDates = [...scoredTests.map((t) => t.test_date), ...checkpoints.map((c) => c.target_date)];
+  const dateRange =
+    allDates.length > 0
+      ? { min: Math.min(...allDates.map((d) => new Date(d).getTime())), max: Math.max(...allDates.map((d) => new Date(d).getTime())) }
+      : null;
+
+  const chartPoints = scoredTests.map((test) => ({ test, x: xForDate(test.test_date, dateRange), y: yForScore(test.scaled_score) }));
   const pathData = chartPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
-  const goalY = goals.lsat_goal_score == null ? null : 20 + (1 - (goals.lsat_goal_score - 120) / 60) * 132;
+  const goalY = goals.lsat_goal_score == null ? null : yForScore(goals.lsat_goal_score);
+
+  const sortedCheckpoints = [...checkpoints].sort((a, b) => a.target_date.localeCompare(b.target_date));
+  const checkpointPoints = sortedCheckpoints.map((c) => ({ checkpoint: c, x: xForDate(c.target_date, dateRange), y: yForScore(c.target_score) }));
+  // The planned path starts from the latest real result (where you
+  // actually are) and runs through each future checkpoint -- "here's the
+  // path from where you are to where you're aiming," not just floating
+  // targets with no connection to the real trajectory.
+  const latestRealPoint = chartPoints[chartPoints.length - 1];
+  const plannedPathPoints = latestRealPoint ? [{ x: latestRealPoint.x, y: latestRealPoint.y }, ...checkpointPoints] : checkpointPoints;
+  const plannedPathData =
+    plannedPathPoints.length > 1
+      ? plannedPathPoints.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
+      : "";
+
+  const hasAnyChartData = chartPoints.length > 0 || checkpointPoints.length > 0;
+  const sortedDates = allDates.slice().sort();
+  const leftLabelDate = sortedDates[0] ?? null;
+  const rightLabelDate = sortedDates[sortedDates.length - 1] ?? null;
 
   return (
     <WorkspaceSection
@@ -84,13 +131,42 @@ export function LsatStatsOverview({
               </div>
             </div>
 
+            {hasSectionData && (
+              <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 border-t border-border-subtle px-4 pt-4 md:px-0">
+                {(Object.keys(SECTION_LABEL) as (keyof typeof SECTION_LABEL)[]).map((key) => {
+                  const stats = sections[key];
+                  if (stats.average == null) return null;
+                  return (
+                    <div key={key}>
+                      <p className="font-mono text-[9px] uppercase tracking-wide text-ink-tertiary">{SECTION_LABEL[key]}</p>
+                      <p className="mt-1 flex items-baseline gap-1.5">
+                        <span className="font-mono text-base font-semibold tabular-nums text-ink-primary">{stats.average.toFixed(1)}</span>
+                        {stats.trend && (
+                          <span
+                            className={cn(
+                              "text-[10px] font-mono",
+                              stats.trend === "improving" && "text-status-onTrack",
+                              stats.trend === "declining" && "text-status-atRisk",
+                              stats.trend === "flat" && "text-ink-tertiary"
+                            )}
+                          >
+                            {stats.trend === "improving" ? "↑" : stats.trend === "declining" ? "↓" : "flat"}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="relative mt-6 overflow-hidden px-1">
-              {chartPoints.length > 0 ? (
+              {hasAnyChartData ? (
                 <svg
                   viewBox="0 0 720 190"
                   className="h-auto w-full min-w-[320px]"
                   role="img"
-                  aria-label={`Practice test score trajectory from ${scoredTests[0]?.scaled_score} to ${latest}`}
+                  aria-label="Practice test score trajectory with planned goal checkpoints"
                 >
                   {[20, 86, 152].map((y) => (
                     <line key={y} x1="48" x2="672" y1={y} y2={y} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
@@ -103,6 +179,9 @@ export function LsatStatsOverview({
                       <line x1="48" x2="672" y1={goalY} y2={goalY} stroke="currentColor" className="text-accent" strokeWidth="1" strokeDasharray="5 7" />
                       <text x="668" y={goalY - 7} textAnchor="end" className="fill-accent font-mono text-[9px] uppercase">Goal {goals.lsat_goal_score}</text>
                     </>
+                  )}
+                  {plannedPathData && (
+                    <path d={plannedPathData} fill="none" stroke="currentColor" className="text-seal" strokeWidth="1.5" strokeDasharray="4 4" />
                   )}
                   {pathData && <path d={pathData} fill="none" stroke="currentColor" className="text-signal" strokeWidth="2" />}
                   {chartPoints.map((point, index) => {
@@ -117,17 +196,34 @@ export function LsatStatsOverview({
                       </g>
                     );
                   })}
-                  <text x="48" y="184" className="fill-ink-tertiary font-mono text-[9px]">{formatDateOnly(scoredTests[0]!.test_date)}</text>
-                  <text x="672" y="184" textAnchor="end" className="fill-ink-tertiary font-mono text-[9px]">
-                    {formatDateOnly(scoredTests[scoredTests.length - 1]!.test_date)}
-                  </text>
+                  {checkpointPoints.map((point) => (
+                    <g key={point.checkpoint.id}>
+                      <rect x={point.x - 4} y={point.y - 4} width="8" height="8" transform={`rotate(45 ${point.x} ${point.y})`} className="fill-seal" />
+                      <text x={point.x} y={point.y - 11} textAnchor="middle" className="fill-seal font-mono text-[10px] font-semibold">
+                        {point.checkpoint.target_score}
+                      </text>
+                    </g>
+                  ))}
+                  {leftLabelDate && (
+                    <text x="48" y="184" className="fill-ink-tertiary font-mono text-[9px]">{formatDateOnly(leftLabelDate)}</text>
+                  )}
+                  {rightLabelDate && (
+                    <text x="672" y="184" textAnchor="end" className="fill-ink-tertiary font-mono text-[9px]">
+                      {formatDateOnly(rightLabelDate)}
+                    </text>
+                  )}
                 </svg>
               ) : (
                 <div className="flex h-40 items-center justify-center border-y border-border-subtle text-xs text-ink-tertiary">
-                  No scored tests to plot.
+                  No scored tests or planned checkpoints to plot yet.
                 </div>
               )}
             </div>
+            {checkpointPoints.length > 0 && (
+              <p className="mt-2 px-4 text-[11px] text-ink-tertiary md:px-0">
+                <span className="mr-1.5 inline-block h-2 w-2 rotate-45 bg-seal align-middle" /> Planned checkpoint — dashed line runs from your latest result to your next planned target, not a prediction.
+              </p>
+            )}
           </div>
 
           <aside className="relative flex min-h-[260px] flex-col justify-between border-t border-border-subtle px-6 py-7 lg:border-l lg:border-t-0">

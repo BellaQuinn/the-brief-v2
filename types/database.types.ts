@@ -273,6 +273,17 @@ export interface Scholarship {
   updated_at: string;
 }
 
+// Added by database/add_lsat_goal_checkpoints.sql -- the goal-gap planner.
+export interface LsatGoalCheckpoint {
+  id: string;
+  user_id: string;
+  target_date: string;
+  target_score: number;
+  label: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface LsatPracticeTest {
   id: string;
   user_id: string;
@@ -494,6 +505,12 @@ export interface Database {
         Row: LsatPracticeTest;
         Insert: Partial<LsatPracticeTest>;
         Update: Partial<LsatPracticeTest>;
+        Relationships: [];
+      };
+      lsat_goal_checkpoints: {
+        Row: LsatGoalCheckpoint;
+        Insert: Partial<LsatGoalCheckpoint>;
+        Update: Partial<LsatGoalCheckpoint>;
         Relationships: [];
       };
       law_school_documents: {

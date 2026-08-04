@@ -8,8 +8,9 @@ import { Modal } from "@/components/ui/Modal";
 import { LsatStatsOverview } from "@/components/graduateLawSchool/LsatStatsOverview";
 import { LsatPracticeTestCard } from "@/components/graduateLawSchool/LsatPracticeTestCard";
 import { LsatPracticeTestForm } from "@/components/graduateLawSchool/LsatPracticeTestForm";
+import { LsatCheckpointList } from "@/components/graduateLawSchool/LsatCheckpointList";
 import type { LsatGoals } from "@/components/graduateLawSchool/LsatGoalForm";
-import type { LsatPracticeTest } from "@/types/database.types";
+import type { LsatGoalCheckpoint, LsatPracticeTest } from "@/types/database.types";
 import { latestScore, remainingToGoal } from "@/lib/lsat";
 import { buildLsatWorkspaceBrief } from "@/lib/workspaceBriefs";
 
@@ -21,14 +22,17 @@ function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
 export function LsatClient({
   initialGoals,
   initialPracticeTests,
+  initialCheckpoints,
 }: {
   initialGoals: LsatGoals;
   initialPracticeTests: LsatPracticeTest[];
+  initialCheckpoints: LsatGoalCheckpoint[];
 }) {
   const [goals, setGoals] = useState(initialGoals);
   const [practiceTests, setPracticeTests] = useState(
     [...initialPracticeTests].sort((a, b) => b.test_date.localeCompare(a.test_date))
   );
+  const [checkpoints, setCheckpoints] = useState(initialCheckpoints);
   const [adding, setAdding] = useState(false);
 
   function handleTestSaved(test: LsatPracticeTest) {
@@ -65,7 +69,9 @@ export function LsatClient({
       />
 
       <div className="space-y-8 px-4 py-6 md:px-8">
-        <LsatStatsOverview goals={goals} practiceTests={practiceTests} onGoalsSaved={setGoals} />
+        <LsatStatsOverview goals={goals} practiceTests={practiceTests} checkpoints={checkpoints} onGoalsSaved={setGoals} />
+
+        <LsatCheckpointList checkpoints={checkpoints} onChange={setCheckpoints} />
 
         <WorkspaceSection eyebrow="Performance record" title="Practice test history">
           {practiceTests.length === 0 ? (
