@@ -30,6 +30,7 @@ export function CertificationForm({ certification, onSaved, onCancel }: Certific
   const [examDate, setExamDate] = useState(certification?.exam_date ?? "");
   const [expirationDate, setExpirationDate] = useState(certification?.expiration_date ?? "");
   const [progress, setProgress] = useState(String(certification?.progress ?? "0"));
+  const [passingScore, setPassingScore] = useState(String(certification?.passing_score ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +46,7 @@ export function CertificationForm({ certification, onSaved, onCancel }: Certific
       exam_date: examDate || null,
       expiration_date: expirationDate || null,
       progress: Number(progress) || 0,
+      passing_score: passingScore ? Number(passingScore) : null,
     };
 
     const { data, error } = certification
@@ -92,6 +94,13 @@ export function CertificationForm({ certification, onSaved, onCancel }: Certific
           onChange={(e) => setExpirationDate(e.target.value)}
         />
       </div>
+      <Input
+        label="Passing score (optional)"
+        type="number"
+        placeholder="e.g. 750 for CompTIA -- leave blank for pass/fail certs"
+        value={passingScore}
+        onChange={(e) => setPassingScore(e.target.value)}
+      />
 
       {error && (
         <p className="rounded-lg border border-status-atRisk/30 bg-status-atRisk/10 px-3 py-2 text-sm text-status-atRisk">

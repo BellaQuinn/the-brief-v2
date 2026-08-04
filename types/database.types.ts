@@ -192,8 +192,50 @@ export interface Certification {
   exam_date: string | null;
   expiration_date: string | null;
   progress: number;
+  // Added by database/add_certification_practice.sql -- nullable since
+  // some certs (e.g. PMP) report a band, not a number, and some are pure
+  // pass/fail with no meaningful passing score at all.
+  passing_score: number | null;
   created_at: string;
   updated_at: string;
+}
+
+// Added by database/add_certification_practice.sql -- domains are
+// user-named per certification (PMP's People/Process/Business
+// Environment, a CompTIA exam's own objectives, etc.), not a fixed set
+// like the LSAT's LR/RC/AR, so this is a free-form array rather than
+// fixed columns.
+export interface CertificationDomainScore {
+  domain: string;
+  score: number | null;
+}
+
+export interface CertificationPracticeTest {
+  id: string;
+  certification_id: string;
+  user_id: string;
+  test_date: string;
+  overall_score: number | null;
+  overall_result: string | null;
+  domain_scores: CertificationDomainScore[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Same Recommendation Object shape as LsatStudyPlanSuggestion (reuses
+// SuggestedMilestone + the same confidence/status enums), but scoped to
+// one certification rather than a singleton exam.
+export interface CertificationStudyPlanSuggestion {
+  id: string;
+  user_id: string;
+  certification_id: string;
+  recommendation: SuggestedMilestone;
+  reason: string;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
 }
 
 export interface Application {
@@ -590,6 +632,18 @@ export interface Database {
         Row: LsatStudyPlanSuggestion;
         Insert: Partial<LsatStudyPlanSuggestion>;
         Update: Partial<LsatStudyPlanSuggestion>;
+        Relationships: [];
+      };
+      certification_practice_tests: {
+        Row: CertificationPracticeTest;
+        Insert: Partial<CertificationPracticeTest>;
+        Update: Partial<CertificationPracticeTest>;
+        Relationships: [];
+      };
+      certification_study_plan_suggestions: {
+        Row: CertificationStudyPlanSuggestion;
+        Insert: Partial<CertificationStudyPlanSuggestion>;
+        Update: Partial<CertificationStudyPlanSuggestion>;
         Relationships: [];
       };
     };
