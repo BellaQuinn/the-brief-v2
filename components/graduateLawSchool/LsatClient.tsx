@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { Modal } from "@/components/ui/Modal";
@@ -9,8 +9,9 @@ import { LsatStatsOverview } from "@/components/graduateLawSchool/LsatStatsOverv
 import { LsatPracticeTestCard } from "@/components/graduateLawSchool/LsatPracticeTestCard";
 import { LsatPracticeTestForm } from "@/components/graduateLawSchool/LsatPracticeTestForm";
 import { LsatCheckpointList } from "@/components/graduateLawSchool/LsatCheckpointList";
+import { LsatStudyPlanReviewModal } from "@/components/graduateLawSchool/LsatStudyPlanReviewModal";
 import type { LsatGoals } from "@/components/graduateLawSchool/LsatGoalForm";
-import type { LsatGoalCheckpoint, LsatPracticeTest } from "@/types/database.types";
+import type { LsatGoalCheckpoint, LsatPracticeTest, LsatStudyPlanSuggestion } from "@/types/database.types";
 import { latestScore, remainingToGoal } from "@/lib/lsat";
 import { buildLsatWorkspaceBrief } from "@/lib/workspaceBriefs";
 
@@ -34,9 +35,27 @@ export function LsatClient({
   );
   const [checkpoints, setCheckpoints] = useState(initialCheckpoints);
   const [adding, setAdding] = useState(false);
+  const [studyPlanOpen, setStudyPlanOpen] = useState(false);
+  const [studyPlanLoading, setStudyPlanLoading] = useState(false);
+  const [studyPlanError, setStudyPlanError] = useState<string | null>(null);
+  const [studyPlanSuggestions, setStudyPlanSuggestions] = useState<LsatStudyPlanSuggestion[]>([]);
 
   function handleTestSaved(test: LsatPracticeTest) {
     setPracticeTests((prev) => upsertById(prev, test).sort((a, b) => b.test_date.localeCompare(a.test_date)));
+  }
+
+  async function handleGenerateStudyPlan() {
+    setStudyPlanOpen(true);
+    setStudyPlanLoading(true);
+    setStudyPlanError(null);
+    const res = await fetch("/api/lsat/generate-study-plan", { method: "POST" });
+    const body = await res.json();
+    setStudyPlanLoading(false);
+    if (!res.ok) {
+      setStudyPlanError(body.error ?? "Study plan generation failed.");
+      return;
+    }
+    setStudyPlanSuggestions(body.suggestions ?? []);
   }
 
   const latest = latestScore(practiceTests);
@@ -58,13 +77,28 @@ export function LsatClient({
         directive={brief.directive}
         meta={`${practiceTests.length} test${practiceTests.length === 1 ? "" : "s"} logged`}
         action={
-          <button
-            onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 border border-accent/30 bg-accent-dim/50 px-3 py-2 text-xs font-medium text-accent-bright transition-colors hover:border-accent/60 hover:bg-accent-dim"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Log practice test
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleGenerateStudyPlan}
+              disabled={goals.lsat_goal_score == null || latest == null}
+              title={
+                goals.lsat_goal_score == null || latest == null
+                  ? "Set a goal and log a scored practice test first"
+                  : undefined
+              }
+              className="flex items-center gap-1.5 border border-seal/30 bg-seal-dim/50 px-3 py-2 text-xs font-medium text-seal-bright transition-colors hover:border-seal/60 hover:bg-seal-dim disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Generate study plan
+            </button>
+            <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1.5 border border-accent/30 bg-accent-dim/50 px-3 py-2 text-xs font-medium text-accent-bright transition-colors hover:border-accent/60 hover:bg-accent-dim"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Log practice test
+            </button>
+          </div>
         }
       />
 
@@ -102,6 +136,14 @@ export function LsatClient({
           </Modal>
         </WorkspaceSection>
       </div>
+
+      <LsatStudyPlanReviewModal
+        open={studyPlanOpen}
+        onClose={() => setStudyPlanOpen(false)}
+        loading={studyPlanLoading}
+        error={studyPlanError}
+        initialSuggestions={studyPlanSuggestions}
+      />
     </div>
   );
 }

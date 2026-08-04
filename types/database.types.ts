@@ -412,6 +412,30 @@ export interface DocumentSuggestion {
   created_at: string;
 }
 
+// The proposed milestone fields an LSAT study-plan suggestion carries --
+// mirrors Milestone's own shape, kept loose since a proposal isn't a real
+// row yet.
+export interface SuggestedMilestone {
+  title: string;
+  target_date: string | null;
+  notes: string | null;
+}
+
+// Added by database/add_lsat_study_plan_suggestions.sql -- shaped like
+// DocumentSuggestion but not tied to a source document; the "evidence" is
+// the practice-test history and computed section trends, not a file
+// excerpt, so there's no separate evidence field -- reason carries it.
+export interface LsatStudyPlanSuggestion {
+  id: string;
+  user_id: string;
+  recommendation: SuggestedMilestone;
+  reason: string;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
+}
+
 // ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
@@ -560,6 +584,12 @@ export interface Database {
         Row: DocumentSuggestion;
         Insert: Partial<DocumentSuggestion>;
         Update: Partial<DocumentSuggestion>;
+        Relationships: [];
+      };
+      lsat_study_plan_suggestions: {
+        Row: LsatStudyPlanSuggestion;
+        Insert: Partial<LsatStudyPlanSuggestion>;
+        Update: Partial<LsatStudyPlanSuggestion>;
         Relationships: [];
       };
     };
