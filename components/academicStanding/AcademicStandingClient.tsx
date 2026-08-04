@@ -4,7 +4,9 @@ import { GpaOverview } from "@/components/academicStanding/GpaOverview";
 import { CoursePerformanceList } from "@/components/academicStanding/CoursePerformanceList";
 import { HonorsProgress } from "@/components/academicStanding/HonorsProgress";
 import { HonorSocietyProgress } from "@/components/academicStanding/HonorSocietyProgress";
+import { ScenarioPlanner } from "@/components/academicStanding/ScenarioPlanner";
 import type { Course } from "@/types/database.types";
+import type { DegreeWithFullTerms } from "@/lib/academicStanding/build";
 import type {
   CourseGradeResult,
   CumulativeGpaResult,
@@ -15,8 +17,10 @@ import type {
 } from "@/lib/academicStanding/types";
 import { buildAcademicStandingWorkspaceBrief } from "@/lib/workspaceBriefs";
 
-// No interactivity here — everything is server-computed and passed down,
-// so this stays a plain (server) component rather than "use client".
+// This stays a plain (server) component — everything except the Scenario
+// Planner is server-computed and passed down. The Planner is a Client
+// Component rendered as a child, which Next.js allows without converting
+// this whole file to "use client".
 export function AcademicStandingClient({
   eyebrow = "ACADEMIC STANDING",
   termGpa,
@@ -25,6 +29,7 @@ export function AcademicStandingClient({
   honorsStatuses,
   graduationForecast,
   honorSocietyProgress,
+  degree,
 }: {
   eyebrow?: string;
   termGpa: TermGpaResult | null;
@@ -33,6 +38,7 @@ export function AcademicStandingClient({
   honorsStatuses: HonorsListStatusEntry[];
   graduationForecast: GraduationHonorsForecast;
   honorSocietyProgress: HonorSocietyProgressResult[];
+  degree: DegreeWithFullTerms;
 }) {
   const inProgressCount = courses.filter(({ grade }) => grade.isProvisional).length;
   const brief = buildAcademicStandingWorkspaceBrief({
@@ -68,6 +74,8 @@ export function AcademicStandingClient({
         <WorkspaceSection eyebrow="Eligibility matrix" title="Honor society">
           <HonorSocietyProgress progress={honorSocietyProgress} />
         </WorkspaceSection>
+
+        <ScenarioPlanner degree={degree} />
       </div>
     </div>
   );

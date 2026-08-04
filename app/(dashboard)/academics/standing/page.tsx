@@ -55,6 +55,7 @@ export default async function AcademicStandingPage() {
       honorsStatuses={data.honorsStatuses}
       graduationForecast={data.graduationForecast}
       honorSocietyProgress={data.honorSocietyProgress}
+      degree={typedDegree}
     />
   );
 }

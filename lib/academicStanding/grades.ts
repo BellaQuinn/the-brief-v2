@@ -1,6 +1,12 @@
 import type { InstitutionAcademicPolicy, GradeBand } from "@/lib/academicPolicy/types";
 import type { Assignment, Course } from "@/types/database.types";
-import type { CalculationBasis, CourseGradeResult, CumulativeGpaResult, TermGpaResult } from "@/lib/academicStanding/types";
+import type {
+  CalculationBasis,
+  CourseGradeResult,
+  CumulativeGpaResult,
+  RequiredGradeResult,
+  TermGpaResult,
+} from "@/lib/academicStanding/types";
 
 // Highest grade band whose minPercent the given percentage clears. Marks
 // like "NP" (minPercent: -1) are never reachable here — they only ever
@@ -153,4 +159,51 @@ export function computeCumulativeGpa(
     gpa: credits > 0 ? points / credits : null,
     basis: buildBasis(gpaBearing, courseGrades),
   };
+}
+
+// The Scenario Planner's "what grade do I need in this course to hit a
+// target cumulative GPA" answer. Tries every real, GPA-bearing grade band
+// from lowest to highest, hypothetically completing the target course at
+// that grade (leaving every other course's real grade/status untouched),
+// and returns the first band that meets the target. If even the highest
+// band falls short, the last band tried (the ceiling) is returned with
+// achievable: false -- an honest "here's the best case" rather than a
+// bare failure.
+export function solveRequiredGrade(
+  targetCumulativeGpa: number,
+  targetCourseId: string,
+  allCourseGrades: Array<{ course: Course; grade: CourseGradeResult }>,
+  policy: InstitutionAcademicPolicy
+): RequiredGradeResult {
+  const bandsAscending = policy.gradingScale
+    .filter((band) => band.minPercent >= 0)
+    .sort((a, b) => a.gradePoints - b.gradePoints);
+
+  let bestCase: RequiredGradeResult = { achievable: false, grade: null, gradePoints: null, projectedGpa: null };
+
+  for (const band of bandsAscending) {
+    const hypothetical = allCourseGrades.map((cg) => {
+      if (cg.course.id !== targetCourseId) return cg;
+      return {
+        course: { ...cg.course, status: "completed" as const },
+        grade: {
+          ...cg.grade,
+          grade: band.grade,
+          gradePoints: band.gradePoints,
+          isGpaBearing: true,
+          isProvisional: false,
+          source: "override" as const,
+        },
+      };
+    });
+    const result = computeCumulativeGpa(hypothetical, policy);
+    if (result.gpa == null) continue;
+
+    bestCase = { achievable: true, grade: band.grade, gradePoints: band.gradePoints, projectedGpa: result.gpa };
+    if (result.gpa >= targetCumulativeGpa) {
+      return bestCase;
+    }
+  }
+
+  return { ...bestCase, achievable: false };
 }

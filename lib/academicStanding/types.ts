@@ -38,6 +38,17 @@ export interface CumulativeGpaResult {
   basis: CalculationBasis;
 }
 
+// The Scenario Planner's "what grade do I need" answer. `achievable:
+// false` with a real grade/projectedGpa still filled in means "here's the
+// best case, an A, and it still falls short" -- an honest ceiling, not a
+// blank failure.
+export interface RequiredGradeResult {
+  achievable: boolean;
+  grade: string | null;
+  gradePoints: number | null;
+  projectedGpa: number | null;
+}
+
 export type HonorsListStatusValue =
   | "eligible"
   | "on_track"
