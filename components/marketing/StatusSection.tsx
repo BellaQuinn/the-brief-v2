@@ -1,7 +1,7 @@
 export function StatusSection() {
   return (
     <section className="border-b border-border-subtle px-4 py-16 md:px-8">
-      <div className="mx-auto max-w-4xl rounded-card border border-border-subtle bg-surface px-6 py-8 md:px-10 md:py-10">
+      <div className="signal-field mx-auto max-w-4xl bg-surface px-6 py-8 md:px-10 md:py-10">
         <p className="eyebrow">Development status</p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink-primary">
           A real, working project — actively built and extended.

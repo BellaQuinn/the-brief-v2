@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 function MissionBriefPreview() {
   return (
-    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[70vh] md:px-8">
+    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[420px] md:px-8">
       <p className="font-mono text-xs uppercase tracking-eyebrow text-signal/75">Mission status</p>
       <p className="mt-4 text-4xl font-bold text-signal md:text-5xl">On track</p>
       <p className="mt-6 text-lg text-ink-secondary">Good afternoon, Alex.</p>
@@ -21,7 +21,7 @@ function MissionBriefPreview() {
 
 function GpaPreview() {
   return (
-    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[70vh] md:px-8">
+    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[420px] md:px-8">
       <p className="font-mono text-xs uppercase tracking-eyebrow text-signal/75">Cumulative reading</p>
       <div className="mt-4 flex items-baseline gap-3">
         <span className="font-mono text-7xl font-bold tabular-nums text-ink-primary md:text-8xl">3.40</span>
@@ -44,18 +44,18 @@ function GpaPreview() {
 
 function ScenarioPreview() {
   return (
-    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[70vh] md:px-8">
+    <div className="signal-field flex flex-col justify-center px-6 py-10 md:min-h-[420px] md:px-8">
       <p className="font-mono text-xs uppercase tracking-eyebrow text-signal/75">What-if // no data is changed</p>
       <p className="mt-4 text-lg text-ink-primary">MGMT 320 — Operations Management → A</p>
-      <div className="mt-8 flex items-baseline gap-6">
+      <div className="mt-8 flex items-baseline gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-wide text-ink-tertiary">Current</p>
-          <p className="font-mono text-5xl font-bold tabular-nums text-ink-primary md:text-6xl">3.40</p>
+          <p className="font-mono text-4xl font-bold tabular-nums text-ink-primary md:text-5xl">3.40</p>
         </div>
-        <ArrowRight className="h-5 w-5 text-ink-tertiary" aria-hidden />
+        <ArrowRight className="h-5 w-5 shrink-0 text-ink-tertiary" aria-hidden />
         <div>
           <p className="font-mono text-xs uppercase tracking-wide text-signal/75">Projected</p>
-          <p className="font-mono text-5xl font-bold tabular-nums text-signal md:text-6xl">3.50</p>
+          <p className="font-mono text-4xl font-bold tabular-nums text-signal md:text-5xl">3.50</p>
         </div>
       </div>
     </div>

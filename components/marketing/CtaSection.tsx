@@ -10,7 +10,7 @@ export function CtaSection() {
           Ready to step into Mission Control?
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-secondary">
-          Stop wondering what deserves your attention today. Open The Brief, read your briefing, and act on it.
+          Stop wondering what deserves your attention today.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
@@ -31,7 +31,7 @@ export function CtaSection() {
 
       <footer className="mx-auto mt-24 max-w-6xl border-t border-border-subtle pt-8 text-center">
         <p className="font-mono text-[10px] uppercase tracking-eyebrow text-ink-tertiary">
-          The Brief — built and maintained by Krystal Talley
+          The Brief — built and maintained by Krystal
         </p>
         <Link href="/progress" className="mt-2 inline-block text-xs text-ink-tertiary hover:text-ink-secondary">
           See my real academic progress →
