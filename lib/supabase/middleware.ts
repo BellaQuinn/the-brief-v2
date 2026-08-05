@@ -3,6 +3,12 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_ROUTES = ["/login", "/signup", "/review", "/progress"];
 
+// Unlike the routes above, /guide is meant to stay reachable no matter
+// who's looking at it -- a signed-in operator should be able to open it
+// from the sidebar without being bounced to /brief the way visiting
+// /login or /progress while signed in would.
+const ALWAYS_ACCESSIBLE_ROUTES = ["/guide"];
+
 /**
  * Refreshes the Supabase auth session on every request and redirects
  * unauthenticated users away from protected (dashboard) routes.
@@ -39,8 +45,11 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute =
     request.nextUrl.pathname === "/" ||
     PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
+  const isAlwaysAccessible = ALWAYS_ACCESSIBLE_ROUTES.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
 
-  if (!user && !isPublicRoute) {
+  if (!user && !isPublicRoute && !isAlwaysAccessible) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);

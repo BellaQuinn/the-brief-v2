@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, BookOpen, Settings, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types/database.types";
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/academics", label: "Academics", icon: GraduationCap, designation: "Academic Intelligence" },
   { href: "/career", label: "Career", icon: Briefcase, designation: "Career Operations" },
   { href: "/resources", label: "Resources", icon: Library, designation: "Resource Archive" },
+  { href: "/guide", label: "Guide", icon: BookOpen, designation: "Reference Manual" },
   { href: "/settings", label: "Settings", icon: Settings, designation: "System Configuration" },
 ] as const;
 

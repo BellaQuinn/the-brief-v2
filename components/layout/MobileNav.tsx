@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, GraduationCap, Briefcase, Library, BookOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/academics", label: "Academics", icon: GraduationCap },
   { href: "/career", label: "Career", icon: Briefcase },
   { href: "/resources", label: "Resources", icon: Library },
+  { href: "/guide", label: "Guide", icon: BookOpen },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
