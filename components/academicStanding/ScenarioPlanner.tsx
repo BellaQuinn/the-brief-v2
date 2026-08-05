@@ -25,7 +25,7 @@ export function ScenarioPlanner({ degree }: { degree: DegreeWithFullTerms }) {
   const allCourses = useMemo(() => degree.terms.flatMap((term) => term.courses), [degree]);
 
   const inProgressCourses = useMemo(
-    () => allCourses.filter((course) => course.status === "in_progress" || course.status === "planned"),
+    () => allCourses.filter((course) => course.status === "in_progress"),
     [allCourses]
   );
 
@@ -71,7 +71,7 @@ export function ScenarioPlanner({ degree }: { degree: DegreeWithFullTerms }) {
         </p>
 
         {inProgressCourses.length === 0 ? (
-          <p className="mt-5 text-sm text-ink-secondary">No in-progress or planned courses to run a scenario on right now.</p>
+          <p className="mt-5 text-sm text-ink-secondary">No in-progress courses to run a scenario on right now.</p>
         ) : (
           <>
             <div className="mt-5 space-y-2.5">
