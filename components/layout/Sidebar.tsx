@@ -41,7 +41,7 @@ export function Sidebar({ user }: { user: Pick<User, "first_name" | "last_name" 
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/");
     router.refresh();
   }
 
