@@ -81,7 +81,7 @@ export function FeaturesSection() {
         <div className="max-w-2xl">
           <p className="eyebrow">What's actually built</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink-primary md:text-4xl">
-            Everything that's actually built.
+            Ten systems, one operator.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-ink-secondary">
             Every item below is live in the product today — not a mockup, not a roadmap slide.
