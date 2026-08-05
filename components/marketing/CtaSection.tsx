@@ -7,7 +7,7 @@ export function CtaSection() {
       <div className="mx-auto max-w-3xl text-center">
         <p className="eyebrow justify-center">Ready when you are</p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink-primary md:text-4xl">
-          Bring your own briefing.
+          Ready to step into Mission Control?
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-secondary">
           Stop wondering what deserves your attention today. Open The Brief, read your briefing, and act on it.
@@ -17,14 +17,14 @@ export function CtaSection() {
             href="#demo"
             className="flex items-center gap-1.5 rounded-lg bg-ink-primary px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
-            Enter Mission Control
+            Launch Demo
             <ArrowRight className="h-4 w-4" aria-hidden />
           </a>
           <Link
             href="/signup"
             className="rounded-lg border border-border px-5 py-3 text-sm font-medium text-ink-primary transition-colors hover:bg-surface-raised"
           >
-            Create your own account
+            Create Account
           </Link>
         </div>
       </div>

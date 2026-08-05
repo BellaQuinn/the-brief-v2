@@ -1,3 +1,14 @@
+import { Briefcase, Calendar, ClipboardList, FileText, GraduationCap, Scale } from "lucide-react";
+
+const CONNECTED_FLOW = [
+  { icon: GraduationCap, label: "Courses" },
+  { icon: ClipboardList, label: "Assignments" },
+  { icon: Calendar, label: "Calendar" },
+  { icon: Briefcase, label: "Career" },
+  { icon: Scale, label: "Graduate School" },
+  { icon: FileText, label: "Documents" },
+];
+
 const COMPARISONS = [
   {
     other: "Track tasks.",
@@ -25,14 +36,28 @@ export function AudienceSection() {
       <div className="mx-auto max-w-5xl">
         <div className="grid gap-12 md:grid-cols-2">
           <div>
-            <p className="eyebrow">Who it's for</p>
+            <p className="eyebrow">One system</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink-primary md:text-3xl">
-              Built for people doing this the hard way.
+              Everything stays connected.
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-ink-secondary">
-              Working full-time while finishing a degree. Stacking a certification on top of a job search. Aiming a
-              bachelor&apos;s toward law school on nights and weekends. If your calendar already has more than one
-              kind of deadline on it, The Brief was built with your exact situation in mind.
+            <div className="mt-6 flex flex-col items-start">
+              {CONNECTED_FLOW.map((item, i) => (
+                <div key={item.label} className="contents">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border-strong bg-surface">
+                      <item.icon className="h-4 w-4 text-signal" aria-hidden />
+                    </span>
+                    <span className="text-sm font-medium text-ink-primary">{item.label}</span>
+                  </div>
+                  {i < CONNECTED_FLOW.length - 1 && (
+                    <div className="ml-[17px] h-5 w-px bg-border-strong" aria-hidden />
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-sm leading-relaxed text-ink-secondary">
+              Stop switching between disconnected systems. The Brief keeps everything connected so you always know
+              what matters next.
             </p>
           </div>
           <div>

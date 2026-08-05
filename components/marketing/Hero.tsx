@@ -6,15 +6,13 @@ export function Hero() {
     <section className="relative overflow-hidden border-b border-border-subtle px-4 py-20 md:px-8 md:py-28">
       <div className="absolute left-1/2 top-0 h-px w-full max-w-4xl -translate-x-1/2 bg-gradient-to-r from-transparent via-signal/40 to-transparent" />
       <div className="mx-auto max-w-3xl text-center">
-        <p className="eyebrow justify-center">Personal operating system</p>
+        <p className="eyebrow justify-center">Mission control for ambitious professionals</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-ink-primary md:text-6xl">
-          Mission control for ambitious professionals.
+          One workspace for your entire academic and professional journey.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-ink-secondary md:text-lg">
-          The Brief is an automated academic and professional operating system. It connects your coursework, career
-          planning, certifications, applications, and long-term goals into one responsive workspace — not another
-          place to enter data twice, the one place that already knows what&apos;s due, what&apos;s next, and whether
-          you&apos;re actually on track.
+          The Brief is an automated academic and professional operating system that connects coursework, careers,
+          certifications, applications, documents, and long-term goals into one intelligent workspace.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a

@@ -1,7 +1,9 @@
 import {
   Bell,
+  Briefcase,
   Calculator,
   Calendar,
+  ClipboardList,
   FileText,
   GraduationCap,
   Link2,
@@ -30,13 +32,19 @@ const FEATURES = [
   },
   {
     icon: FileText,
-    title: "Documents + Syllabus Intelligence",
+    title: "Upload it once. Connect it everywhere.",
+    description:
+      "Every transcript, resume, and financial document lives in one place, linked to the degree, course, or application it actually belongs to — never a flat, unsearchable folder.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Turn a syllabus into a semester plan in minutes.",
     description:
       "Upload a syllabus and review AI-proposed assignments one at a time — accept, edit, or dismiss each. Nothing gets written to your real record without you saying so.",
   },
   {
     icon: Calculator,
-    title: "Scenario Planner",
+    title: "Predict your GPA before grades are final.",
     description:
       "\"What grade do I need on the final\" answered instantly from your real numbers — including an honest ceiling when a target genuinely isn't reachable.",
   },
@@ -45,6 +53,12 @@ const FEATURES = [
     title: "LSAT study plans",
     description:
       "Section-by-section trend analysis and goal-gap checkpoints, with AI-proposed study tasks you review and accept individually into your real plan.",
+  },
+  {
+    icon: Briefcase,
+    title: "Track every opportunity from application to offer.",
+    description:
+      "Every application moves through one real kanban — Saved, Applied, Interviewing, Offer — the same record your dashboard and calendar already read, not a separate tracker to keep in sync.",
   },
   {
     icon: Bell,
@@ -67,7 +81,7 @@ export function FeaturesSection() {
         <div className="max-w-2xl">
           <p className="eyebrow">What's actually built</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink-primary md:text-4xl">
-            Eight systems, one operator.
+            Everything that's actually built.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-ink-secondary">
             Every item below is live in the product today — not a mockup, not a roadmap slide.

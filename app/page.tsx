@@ -1,9 +1,11 @@
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { Hero } from "@/components/marketing/Hero";
-import { ProblemSection } from "@/components/marketing/ProblemSection";
-import { FeaturesSection } from "@/components/marketing/FeaturesSection";
-import { PreviewSection } from "@/components/marketing/PreviewSection";
+import { CapabilityStrip } from "@/components/marketing/CapabilityStrip";
 import { AudienceSection } from "@/components/marketing/AudienceSection";
+import { BuiltAroundOneIdea } from "@/components/marketing/BuiltAroundOneIdea";
+import { PreviewSection } from "@/components/marketing/PreviewSection";
+import { FeaturesSection } from "@/components/marketing/FeaturesSection";
+import { WhyItExistsSection } from "@/components/marketing/WhyItExistsSection";
 import { StatusSection } from "@/components/marketing/StatusSection";
 import { CtaSection } from "@/components/marketing/CtaSection";
 
@@ -16,10 +18,12 @@ export default function RootPage() {
     <main className="min-h-screen bg-background">
       <MarketingNav />
       <Hero />
-      <PreviewSection />
-      <ProblemSection />
-      <FeaturesSection />
+      <CapabilityStrip />
       <AudienceSection />
+      <BuiltAroundOneIdea />
+      <PreviewSection />
+      <FeaturesSection />
+      <WhyItExistsSection />
       <StatusSection />
       <CtaSection />
     </main>
