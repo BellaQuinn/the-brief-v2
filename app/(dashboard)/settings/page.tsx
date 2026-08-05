@@ -1,9 +1,11 @@
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
 import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { ProfileForm } from "@/components/settings/ProfileForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { NotificationsForm } from "@/components/settings/NotificationsForm";
+import { PortfolioPreviewCard } from "@/components/settings/PortfolioPreviewCard";
 import { buildSettingsWorkspaceBrief } from "@/lib/workspaceBriefs";
 
 // Every dashboard page shows session-specific data (this operator's
@@ -29,6 +31,15 @@ export default async function SettingsPage() {
     hasTimezone: Boolean(profile?.timezone),
   });
 
+  // Built from the real request host rather than a hardcoded env var, so
+  // this stays correct whether she's on the preview URL, a future
+  // production domain, or localhost.
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host");
+  const protocol = host?.startsWith("localhost") ? "http" : "https";
+  const reviewToken = process.env.REVIEW_ACCESS_TOKEN;
+  const portfolioPreviewUrl = reviewToken && host ? `${protocol}://${host}/review/${reviewToken}/brief` : null;
+
   return (
     <div>
       <WorkspaceBrief
@@ -48,6 +59,11 @@ export default async function SettingsPage() {
         <WorkspaceSection eyebrow="Reminders" title="Push notifications">
           <NotificationsForm />
         </WorkspaceSection>
+        {portfolioPreviewUrl && (
+          <WorkspaceSection eyebrow="Shareable record" title="Portfolio Preview">
+            <PortfolioPreviewCard url={portfolioPreviewUrl} />
+          </WorkspaceSection>
+        )}
       </div>
     </div>
   );
