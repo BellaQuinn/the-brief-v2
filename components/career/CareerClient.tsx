@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { isPast, isToday } from "date-fns";
 import { Plus } from "lucide-react";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { WorkspaceBrief } from "@/components/layout/WorkspaceBrief";
+import { WorkspaceSection } from "@/components/layout/WorkspaceSection";
 import { Modal } from "@/components/ui/Modal";
 import { CertificationCard } from "@/components/career/CertificationCard";
 import { CertificationForm } from "@/components/career/CertificationForm";
@@ -10,6 +12,7 @@ import { ApplicationKanban } from "@/components/career/ApplicationKanban";
 import { NetworkingRow } from "@/components/career/NetworkingRow";
 import { NetworkingForm } from "@/components/career/NetworkingForm";
 import { ResumeCard } from "@/components/career/ResumeCard";
+import { buildCareerWorkspaceBrief } from "@/lib/workspaceBriefs";
 import type { Application, Certification, NetworkingContact } from "@/types/database.types";
 
 function upsertById<T extends { id: string }>(list: T[], row: T): T[] {
@@ -41,36 +44,53 @@ export function CareerClient({
   const [addingCert, setAddingCert] = useState(false);
   const [addingContact, setAddingContact] = useState(false);
 
+  const activeCertificationCount = certifications.filter(({ status }) => status === "studying" || status === "scheduled").length;
+  const activeApplicationCount = applications.filter(({ status }) =>
+    ["applied", "phone_screen", "interviewing", "offer"].includes(status)
+  ).length;
+  const dueFollowUpCount = networking.filter(({ next_follow_up }) => {
+    if (!next_follow_up) return false;
+    const date = new Date(next_follow_up);
+    return isPast(date) || isToday(date);
+  }).length;
+  const brief = buildCareerWorkspaceBrief({
+    certificationCount: certifications.length,
+    activeCertificationCount,
+    activeApplicationCount,
+    dueFollowUpCount,
+  });
+
   return (
     <div>
-      <WorkspaceHeader
-        eyebrow="CAREER"
-        title="Career workspace"
-        subtitle={`${certifications.length} certifications · ${applications.length} applications · ${networking.length} contacts`}
+      <WorkspaceBrief
+        eyebrow="Career // Operations"
+        status={brief.status}
+        situation={brief.situation}
+        directive={brief.directive}
+        meta={`${certifications.length} credentials · ${applications.length} applications · ${networking.length} contacts`}
       />
 
-      <div className="space-y-8 px-4 py-6 md:px-8">
-        <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-ink-primary">Certifications</h2>
-            <button
-              onClick={() => setAddingCert(true)}
-              className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add certification
+      <div className="space-y-10 px-4 py-7 md:px-8 md:py-8">
+        <WorkspaceSection
+          eyebrow="Credential signal"
+          title="Certification readiness"
+          action={
+            <button onClick={() => setAddingCert(true)} className="flex items-center gap-1.5 text-xs text-accent hover:text-accent-bright">
+              <Plus className="h-3.5 w-3.5" /> Add certification
             </button>
-          </div>
+          }
+        >
           {certifications.length === 0 ? (
-            <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
+            <div className="border-y border-border-subtle px-6 py-8 text-center">
               <p className="text-sm text-ink-secondary">No certifications tracked yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {certifications.map((c) => (
+            <div className="trace-rail border-y border-border-subtle py-2">
+              {certifications.map((c, index) => (
                 <CertificationCard
                   key={c.id}
                   certification={c}
+                  index={index + 1}
                   onSaved={(updated) => setCertifications((prev) => upsertById(prev, updated))}
                   onDeleted={(id) => setCertifications((prev) => prev.filter((item) => item.id !== id))}
                 />
@@ -86,34 +106,31 @@ export function CareerClient({
               onCancel={() => setAddingCert(false)}
             />
           </Modal>
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Job applications</h2>
+        <WorkspaceSection eyebrow="Opportunity pipeline" title="Application movement">
           <ApplicationKanban
             applications={applications}
             onSaved={(a) => setApplications((prev) => upsertById(prev, a))}
             onDeleted={(id) => setApplications((prev) => prev.filter((item) => item.id !== id))}
           />
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-ink-primary">Networking</h2>
-            <button
-              onClick={() => setAddingContact(true)}
-              className="flex items-center gap-1.5 text-xs text-signal hover:text-signal-bright"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add contact
+        <WorkspaceSection
+          eyebrow="Relationship trace"
+          title="Follow-through network"
+          action={
+            <button onClick={() => setAddingContact(true)} className="flex items-center gap-1.5 text-xs text-accent hover:text-accent-bright">
+              <Plus className="h-3.5 w-3.5" /> Add contact
             </button>
-          </div>
+          }
+        >
           {networking.length === 0 ? (
-            <div className="rounded-card border border-dashed border-border px-6 py-8 text-center">
+            <div className="border-y border-border-subtle px-6 py-8 text-center">
               <p className="text-sm text-ink-secondary">No contacts tracked yet.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-border-subtle rounded-card border border-border bg-surface">
+            <ul className="trace-rail border-y border-border-subtle py-2">
               {networking.map((contact) => (
                 <NetworkingRow
                   key={contact.id}
@@ -133,10 +150,9 @@ export function CareerClient({
               onCancel={() => setAddingContact(false)}
             />
           </Modal>
-        </section>
+        </WorkspaceSection>
 
-        <section>
-          <h2 className="mb-3 text-sm font-medium text-ink-primary">Resume</h2>
+        <WorkspaceSection eyebrow="Primary dossier" title="Resume source">
           <ResumeCard
             resumeUrl={resumeUrl}
             resumeUpdatedAt={resumeUpdatedAt}
@@ -145,7 +161,7 @@ export function CareerClient({
               setResumeUpdatedAt(updatedAt);
             }}
           />
-        </section>
+        </WorkspaceSection>
       </div>
     </div>
   );

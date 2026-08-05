@@ -60,7 +60,7 @@ export function ApplicationCard({
   }
 
   return (
-    <div className="w-64 shrink-0 rounded-lg border border-border-subtle bg-surface-raised p-3">
+    <div className="border-b border-border-subtle py-3 first:border-t">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-ink-primary">{application.position}</p>

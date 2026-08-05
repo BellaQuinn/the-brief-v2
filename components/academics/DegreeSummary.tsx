@@ -5,16 +5,18 @@ import { Pencil, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Modal } from "@/components/ui/Modal";
 import { DegreeForm } from "@/components/academics/DegreeForm";
-import { cn } from "@/lib/utils";
+import { cn, formatDateOnly } from "@/lib/utils";
 import { DEGREE_STATUS_BADGE_CLASS, DEGREE_STATUS_LABEL } from "@/lib/degreeStatus";
 import type { Degree } from "@/types/database.types";
 
 export function DegreeSummary({
   degree,
+  programIndex,
   onSaved,
   onDeleted,
 }: {
   degree: Degree;
+  programIndex: number;
   onSaved: (degree: Degree) => void;
   onDeleted: (degreeId: string) => void;
 }) {
@@ -46,15 +48,23 @@ export function DegreeSummary({
   }
 
   return (
-    <div className="rounded-card border border-border bg-surface p-5">
-      <div className="flex items-start justify-between gap-3">
+    <section className="relative border-b border-border-subtle pb-8">
+      <div aria-hidden className="absolute -left-5 top-0 font-mono text-[44px] font-bold leading-none text-signal/[0.035] md:-left-8 md:text-[72px]">
+        {String(programIndex).padStart(2, "0")}
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
         <div className="min-w-0">
-          <p className="eyebrow mb-1 truncate">{degree.school_name}</p>
-          <h2 className="truncate font-display text-lg font-medium text-ink-primary">{degree.degree_name}</h2>
-          {degree.major && <p className="mt-0.5 truncate text-sm text-ink-secondary">{degree.major}</p>}
+          <p className="eyebrow mb-3 truncate">
+            Program {String(programIndex).padStart(2, "0")} // {degree.school_name}
+          </p>
+          <h2 className="max-w-[24ch] font-display text-2xl font-semibold leading-tight tracking-tight text-ink-primary md:text-[32px]">
+            {degree.degree_name}
+          </h2>
+          {degree.major && <p className="mt-2 text-sm text-ink-secondary">{degree.major}</p>}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className={cn("rounded-full border px-2.5 py-0.5 text-xs", DEGREE_STATUS_BADGE_CLASS[degree.status])}>
+        <div className="flex shrink-0 items-center gap-2 md:justify-end">
+          <span className={cn("border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wide", DEGREE_STATUS_BADGE_CLASS[degree.status])}>
             {DEGREE_STATUS_LABEL[degree.status]}
           </span>
           <button
@@ -76,17 +86,37 @@ export function DegreeSummary({
         </div>
       </div>
 
-      <div className="mt-5">
-        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-xs text-ink-secondary">
-          <span>
-            {degree.completed_credits} / {degree.total_credits ?? "—"} credits
-          </span>
-          {degree.expected_graduation && (
-            <span>Expected {new Date(degree.expected_graduation).toLocaleDateString()}</span>
-          )}
+      <div className="mt-10 grid gap-5 md:grid-cols-[140px_minmax(0,1fr)_84px] md:items-end">
+        <div>
+          <p className="font-mono text-[9px] uppercase tracking-wide text-ink-tertiary">Credits secured</p>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="font-mono text-3xl font-bold tabular-nums text-ink-primary">{degree.completed_credits}</span>
+            <span className="font-mono text-[10px] text-ink-tertiary">/ {degree.total_credits ?? "—"}</span>
+          </div>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-          <div className="h-full rounded-full bg-signal" style={{ width: `${pct}%` }} />
+        <div className="pb-1">
+          <div className="relative h-7">
+            <div className="absolute inset-x-0 top-3 h-px bg-border-strong" />
+            <div className="absolute left-0 top-2 h-3 w-px bg-ink-tertiary" />
+            <div className="absolute right-0 top-2 h-3 w-px bg-ink-tertiary" />
+            {[20, 40, 60, 80].map((mark) => (
+              <span key={mark} aria-hidden className="absolute top-2.5 h-2 w-px bg-border-strong" style={{ left: `${mark}%` }} />
+            ))}
+            <div className="absolute left-0 top-3 h-px bg-signal shadow-[0_0_9px_rgba(16,185,129,0.7)]" style={{ width: `${pct}%` }} />
+            <span
+              aria-hidden
+              className="absolute top-[7px] h-3 w-3 -translate-x-1/2 rotate-45 border border-signal bg-background shadow-[0_0_9px_rgba(16,185,129,0.7)]"
+              style={{ left: `${pct}%` }}
+            />
+          </div>
+          <div className="mt-1 flex justify-between font-mono text-[8px] uppercase tracking-wide text-ink-tertiary">
+            <span>Origin</span>
+            <span>{degree.expected_graduation ? `ETA ${formatDateOnly(degree.expected_graduation)}` : "ETA not set"}</span>
+          </div>
+        </div>
+        <div className="md:text-right">
+          <p className="font-mono text-[9px] uppercase tracking-wide text-ink-tertiary">Completion</p>
+          <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-signal">{degree.total_credits ? `${pct}%` : "—"}</p>
         </div>
       </div>
 
@@ -100,6 +130,6 @@ export function DegreeSummary({
           onCancel={() => setEditing(false)}
         />
       </Modal>
-    </div>
+    </section>
   );
 }

@@ -50,6 +50,50 @@ export type ScholarshipStatus = "researching" | "eligible" | "applying" | "appli
 export type MilestoneStatus = "upcoming" | "in_progress" | "completed";
 export type DocumentCategory = "essay" | "recommendation" | "transcript" | "financial" | "other";
 
+// Added by database/add_documents.sql — the shared Academic Documents
+// system, distinct from LawSchoolDocument/DocumentCategory above (that one
+// stays law-school-only; this one spans every domain).
+export type AcademicDocumentCategory =
+  | "syllabus"
+  | "notes"
+  | "assignment_submission"
+  | "reference"
+  | "transcript"
+  | "certificate"
+  | "resume"
+  | "cover_letter"
+  | "recommendation"
+  | "financial"
+  | "essay"
+  | "other";
+export type DocumentRelationshipEntityType =
+  | "degree"
+  | "term"
+  | "course"
+  | "assignment"
+  | "certification"
+  | "application"
+  | "law_school"
+  | "scholarship"
+  | "milestone";
+export type DocumentStatus = "active" | "archived";
+
+// Added by database/add_document_suggestions.sql — Syllabus Intelligence.
+export type DocumentSuggestionConfidence = "high" | "medium" | "low";
+export type DocumentSuggestionStatus = "pending" | "accepted" | "edited_and_accepted" | "dismissed";
+
+// The proposed assignment fields Claude extracts from a syllabus — mirrors
+// Assignment's own shape, kept loose (all optional except title) since a
+// syllabus rarely states every field explicitly.
+export interface SuggestedAssignment {
+  title: string;
+  type: AssignmentType;
+  due_date: string | null;
+  points_possible: number | null;
+  weight_percent: number | null;
+  priority: PriorityLevel;
+}
+
 export interface User {
   id: string;
   first_name: string | null;
@@ -148,8 +192,50 @@ export interface Certification {
   exam_date: string | null;
   expiration_date: string | null;
   progress: number;
+  // Added by database/add_certification_practice.sql -- nullable since
+  // some certs (e.g. PMP) report a band, not a number, and some are pure
+  // pass/fail with no meaningful passing score at all.
+  passing_score: number | null;
   created_at: string;
   updated_at: string;
+}
+
+// Added by database/add_certification_practice.sql -- domains are
+// user-named per certification (PMP's People/Process/Business
+// Environment, a CompTIA exam's own objectives, etc.), not a fixed set
+// like the LSAT's LR/RC/AR, so this is a free-form array rather than
+// fixed columns.
+export interface CertificationDomainScore {
+  domain: string;
+  score: number | null;
+}
+
+export interface CertificationPracticeTest {
+  id: string;
+  certification_id: string;
+  user_id: string;
+  test_date: string;
+  overall_score: number | null;
+  overall_result: string | null;
+  domain_scores: CertificationDomainScore[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Same Recommendation Object shape as LsatStudyPlanSuggestion (reuses
+// SuggestedMilestone + the same confidence/status enums), but scoped to
+// one certification rather than a singleton exam.
+export interface CertificationStudyPlanSuggestion {
+  id: string;
+  user_id: string;
+  certification_id: string;
+  recommendation: SuggestedMilestone;
+  reason: string;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
 }
 
 export interface Application {
@@ -229,6 +315,17 @@ export interface Scholarship {
   updated_at: string;
 }
 
+// Added by database/add_lsat_goal_checkpoints.sql -- the goal-gap planner.
+export interface LsatGoalCheckpoint {
+  id: string;
+  user_id: string;
+  target_date: string;
+  target_score: number;
+  label: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface LsatPracticeTest {
   id: string;
   user_id: string;
@@ -272,6 +369,115 @@ export interface Milestone {
   updated_at: string;
 }
 
+// Named `*Record`, not `PushSubscription` — that name is already the
+// browser's native Push API type (lib/pushClient.ts deals in those
+// directly), and reusing it here for the database row would collide.
+export interface PushSubscriptionRecord {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationLogEntry {
+  id: string;
+  user_id: string;
+  source_type: string;
+  source_id: string;
+  reminder_window: string;
+  sent_at: string;
+}
+
+// ----------------------------------------------------------------------------
+// Academic Documents — database/add_documents.sql. Shared across every
+// domain (see AcademicDocumentCategory/DocumentRelationshipEntityType
+// above), plus the first real Supabase Storage usage in this app.
+// ----------------------------------------------------------------------------
+export interface DocumentRecord {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  category: AcademicDocumentCategory;
+  status: DocumentStatus;
+  is_favorite: boolean;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  extracted_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentRelationship {
+  id: string;
+  document_id: string;
+  user_id: string;
+  entity_type: DocumentRelationshipEntityType;
+  entity_id: string;
+  created_at: string;
+}
+
+export interface DocumentVersion {
+  id: string;
+  document_id: string;
+  user_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  version_number: number;
+  uploaded_at: string;
+}
+
+export interface DocumentView {
+  id: string;
+  document_id: string;
+  user_id: string;
+  viewed_at: string;
+}
+
+export interface DocumentSuggestion {
+  id: string;
+  document_id: string;
+  user_id: string;
+  recommendation: SuggestedAssignment;
+  reason: string;
+  evidence: string | null;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
+}
+
+// The proposed milestone fields an LSAT study-plan suggestion carries --
+// mirrors Milestone's own shape, kept loose since a proposal isn't a real
+// row yet.
+export interface SuggestedMilestone {
+  title: string;
+  target_date: string | null;
+  notes: string | null;
+}
+
+// Added by database/add_lsat_study_plan_suggestions.sql -- shaped like
+// DocumentSuggestion but not tied to a source document; the "evidence" is
+// the practice-test history and computed section trends, not a file
+// excerpt, so there's no separate evidence field -- reason carries it.
+export interface LsatStudyPlanSuggestion {
+  id: string;
+  user_id: string;
+  recommendation: SuggestedMilestone;
+  reason: string;
+  confidence: DocumentSuggestionConfidence;
+  status: DocumentSuggestionStatus;
+  resolved_at: string | null;
+  created_at: string;
+}
+
 // ----------------------------------------------------------------------------
 // Composite / query-shape types used across workspaces.
 // Assignments are the single source of truth — this is the shape the
@@ -302,6 +508,18 @@ export interface TermWithCourses extends Term {
 
 export interface DegreeWithTerms extends Degree {
   terms: TermWithCourses[];
+}
+
+// Documents workspace's list/card view needs both the raw relationship rows
+// (for editing) and a resolved, human-readable label per relationship (for
+// display) — entity_id alone means nothing on screen. Resolution happens at
+// the data layer (app/(dashboard)/academics/documents/page.tsx), not here.
+export interface DocumentRelationshipWithLabel extends DocumentRelationship {
+  label: string;
+}
+
+export interface DocumentWithRelationships extends DocumentRecord {
+  relationships: DocumentRelationshipWithLabel[];
 }
 
 // supabase-js's generic client requires each table to satisfy `GenericTable`
@@ -355,6 +573,12 @@ export interface Database {
         Update: Partial<LsatPracticeTest>;
         Relationships: [];
       };
+      lsat_goal_checkpoints: {
+        Row: LsatGoalCheckpoint;
+        Insert: Partial<LsatGoalCheckpoint>;
+        Update: Partial<LsatGoalCheckpoint>;
+        Relationships: [];
+      };
       law_school_documents: {
         Row: LawSchoolDocument;
         Insert: Partial<LawSchoolDocument>;
@@ -362,6 +586,66 @@ export interface Database {
         Relationships: [];
       };
       milestones: { Row: Milestone; Insert: Partial<Milestone>; Update: Partial<Milestone>; Relationships: [] };
+      push_subscriptions: {
+        Row: PushSubscriptionRecord;
+        Insert: Partial<PushSubscriptionRecord>;
+        Update: Partial<PushSubscriptionRecord>;
+        Relationships: [];
+      };
+      notification_log: {
+        Row: NotificationLogEntry;
+        Insert: Partial<NotificationLogEntry>;
+        Update: Partial<NotificationLogEntry>;
+        Relationships: [];
+      };
+      documents: {
+        Row: DocumentRecord;
+        Insert: Partial<DocumentRecord>;
+        Update: Partial<DocumentRecord>;
+        Relationships: [];
+      };
+      document_relationships: {
+        Row: DocumentRelationship;
+        Insert: Partial<DocumentRelationship>;
+        Update: Partial<DocumentRelationship>;
+        Relationships: [];
+      };
+      document_versions: {
+        Row: DocumentVersion;
+        Insert: Partial<DocumentVersion>;
+        Update: Partial<DocumentVersion>;
+        Relationships: [];
+      };
+      document_views: {
+        Row: DocumentView;
+        Insert: Partial<DocumentView>;
+        Update: Partial<DocumentView>;
+        Relationships: [];
+      };
+      document_suggestions: {
+        Row: DocumentSuggestion;
+        Insert: Partial<DocumentSuggestion>;
+        Update: Partial<DocumentSuggestion>;
+        Relationships: [];
+      };
+      lsat_study_plan_suggestions: {
+        Row: LsatStudyPlanSuggestion;
+        Insert: Partial<LsatStudyPlanSuggestion>;
+        Update: Partial<LsatStudyPlanSuggestion>;
+        Relationships: [];
+      };
+      certification_practice_tests: {
+        Row: CertificationPracticeTest;
+        Insert: Partial<CertificationPracticeTest>;
+        Update: Partial<CertificationPracticeTest>;
+        Relationships: [];
+      };
+      certification_study_plan_suggestions: {
+        Row: CertificationStudyPlanSuggestion;
+        Insert: Partial<CertificationStudyPlanSuggestion>;
+        Update: Partial<CertificationStudyPlanSuggestion>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

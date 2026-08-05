@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/signup", "/review"];
+const PUBLIC_ROUTES = ["/login", "/signup", "/review", "/progress"];
 
 /**
  * Refreshes the Supabase auth session on every request and redirects
@@ -33,15 +33,16 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Root is public too (the read-only progress page), but must be an exact
+  // Root is public too (the marketing landing page), but must be an exact
   // match — startsWith("/") would match every path and disable the gate.
+  // /progress is the read-only progress page the landing page links to.
   const isPublicRoute =
     request.nextUrl.pathname === "/" ||
     PUBLIC_ROUTES.some((route) => request.nextUrl.pathname.startsWith(route));
 
   if (!user && !isPublicRoute) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
+    redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);
   }
 

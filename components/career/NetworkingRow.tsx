@@ -37,7 +37,9 @@ export function NetworkingRow({
   }
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li className="relative flex items-center gap-3 py-3 pl-9">
+      <span aria-hidden className="trace-node !top-5" />
+      <span aria-hidden className="trace-connector !top-[23px]" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-ink-primary">{contact.name}</p>
         <p className="mt-0.5 truncate text-xs text-ink-tertiary">

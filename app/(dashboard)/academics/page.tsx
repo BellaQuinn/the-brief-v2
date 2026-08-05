@@ -3,6 +3,12 @@ import { AcademicsClient } from "@/components/academics/AcademicsClient";
 import { sortDegrees } from "@/lib/utils";
 import type { DegreeWithTerms } from "@/types/database.types";
 
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
+
 export default async function AcademicsPage() {
   const supabase = await createClient();
 

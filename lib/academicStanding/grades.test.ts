@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { champlainUndergraduatePolicy as policy } from "@/lib/academicPolicy/champlain";
-import { computeCourseGrade, computeCumulativeGpa, computeTermGpa, percentageToGradeBand } from "@/lib/academicStanding/grades";
+import { computeCourseGrade, computeCumulativeGpa, computeTermGpa, percentageToGradeBand, solveRequiredGrade } from "@/lib/academicStanding/grades";
 import type { Assignment, Course } from "@/types/database.types";
 
 function makeCourse(overrides: Partial<Course> = {}): Course {
@@ -189,5 +189,55 @@ describe("computeTermGpa and computeCumulativeGpa", () => {
     expect(cumulative.gpa).toBeNull();
     expect(cumulative.basis.completedCredits).toBe(0);
     expect(cumulative.basis.inProgressCourseCount).toBe(1);
+  });
+});
+
+describe("solveRequiredGrade", () => {
+  it("finds the minimum grade that reaches an achievable target", () => {
+    // 12 completed credits at a 4.00 already banked; a 3-credit in-progress
+    // course needs only a modest grade to keep cumulative at/above 3.80.
+    const bankedCourse = makeCourse({ id: "banked", credits: 12, status: "completed", final_grade_override: "A" });
+    const targetCourse = makeCourse({ id: "target", credits: 3, status: "in_progress" });
+    const allCourseGrades = [
+      { course: bankedCourse, grade: computeCourseGrade(bankedCourse, [], policy) },
+      { course: targetCourse, grade: computeCourseGrade(targetCourse, [], policy) },
+    ];
+
+    const result = solveRequiredGrade(3.8, "target", allCourseGrades, policy);
+    expect(result.achievable).toBe(true);
+    // (4.00*12 + x*3) / 15 >= 3.80 -> x >= 3.0 -> "B" (3.00) is the first band that clears it
+    expect(result.grade).toBe("B");
+    expect(result.projectedGpa).toBeGreaterThanOrEqual(3.8);
+  });
+
+  it("returns the best-case ceiling with achievable: false when even an A falls short", () => {
+    // A single low grade already banked drags the cumulative low enough
+    // that no grade in one 3-credit course can reach 3.95.
+    const bankedCourse = makeCourse({ id: "banked", credits: 30, status: "completed", final_grade_override: "C" });
+    const targetCourse = makeCourse({ id: "target", credits: 3, status: "in_progress" });
+    const allCourseGrades = [
+      { course: bankedCourse, grade: computeCourseGrade(bankedCourse, [], policy) },
+      { course: targetCourse, grade: computeCourseGrade(targetCourse, [], policy) },
+    ];
+
+    const result = solveRequiredGrade(3.95, "target", allCourseGrades, policy);
+    expect(result.achievable).toBe(false);
+    expect(result.grade).toBe("A");
+    expect(result.projectedGpa).toBeLessThan(3.95);
+  });
+
+  it("leaves every other course's real grade untouched while solving", () => {
+    const otherCourse = makeCourse({ id: "other", credits: 3, status: "completed", final_grade_override: "B" });
+    const targetCourse = makeCourse({ id: "target", credits: 3, status: "in_progress" });
+    const allCourseGrades = [
+      { course: otherCourse, grade: computeCourseGrade(otherCourse, [], policy) },
+      { course: targetCourse, grade: computeCourseGrade(targetCourse, [], policy) },
+    ];
+
+    solveRequiredGrade(3.5, "target", allCourseGrades, policy);
+    // the input array's own course objects should be unmodified (a real
+    // regression risk with in-place mutation instead of copying)
+    expect(otherCourse.final_grade_override).toBe("B");
+    expect(targetCourse.status).toBe("in_progress");
   });
 });

@@ -6,8 +6,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
 }
 
+// Green is a status signal now (on-track/success/progress), not a default
+// interactive color — the primary CTA is a confident neutral instead of
+// "the green thing," matching the rest of the neutral-first palette.
 const VARIANTS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-signal text-background hover:bg-signal-bright",
+  primary: "bg-ink-primary text-background hover:opacity-90",
   secondary: "border border-border bg-surface text-ink-primary hover:bg-surface-raised",
   danger: "border border-status-atRisk/40 text-status-atRisk hover:bg-status-atRisk/10",
   ghost: "text-ink-secondary hover:text-ink-primary hover:bg-surface-raised",

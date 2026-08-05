@@ -2,7 +2,10 @@ import Link from "next/link";
 import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
 import type { GraduationHonorsForecast } from "@/lib/academicStanding/types";
 
-function honorsRangeLabel(termGpa: number | null): string | null {
+// Exported for reuse by the Brief page's GPA instrument gauge, so both
+// surfaces read the same honors range off the same policy computation
+// rather than each carrying their own copy of this logic.
+export function honorsRangeLabel(termGpa: number | null): string | null {
   if (termGpa === null) return null;
   const rules = [...champlainUndergraduatePolicy.honorsLists].sort((a, b) => b.minTermGpa - a.minTermGpa);
   const match = rules.find((rule) => termGpa >= rule.minTermGpa);
@@ -25,7 +28,7 @@ export function GpaCard({
   return (
     <Link
       href={href}
-      className="block rounded-card border border-border bg-surface px-4 py-3.5 transition-colors hover:border-border-strong"
+      className="block rounded-card border border-border bg-surface px-4 py-3.5 shadow-card transition-shadow hover:shadow-elevated"
     >
       <p className="eyebrow mb-2">Current GPA</p>
       {cumulativeGpa !== null ? (

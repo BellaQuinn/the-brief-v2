@@ -20,7 +20,7 @@ export function ReviewBanner() {
             <p className="text-xs leading-relaxed text-ink-secondary">
               <span className="font-display font-medium text-ink-primary">The Brief</span>
               <span className="mx-1.5 text-ink-tertiary">·</span>
-              Mission Control for ambitious nontraditional students.
+              Mission Control for ambitious professionals.
               <span className="mx-1.5 text-ink-tertiary">·</span>
               This preview contains real portfolio data and is intended for demonstration purposes.
             </p>

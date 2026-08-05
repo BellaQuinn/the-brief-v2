@@ -1,7 +1,21 @@
 import { format } from "date-fns";
-import type { AssignmentWithDegreeContext, Certification, NetworkingContact } from "@/types/database.types";
+import type {
+  AssignmentWithDegreeContext,
+  Certification,
+  LawSchool,
+  Milestone,
+  NetworkingContact,
+  Scholarship,
+} from "@/types/database.types";
 
-export type CalendarEventType = "assignment" | "certification" | "networking";
+export type CalendarEventType =
+  | "assignment"
+  | "certification"
+  | "networking"
+  | "law_school"
+  | "scholarship"
+  | "milestone"
+  | "lsat_test_date";
 
 export interface CalendarEvent {
   id: string;
@@ -33,6 +47,10 @@ export function buildCalendarEvents(
     assignments: AssignmentWithDegreeContext[];
     certifications: Certification[];
     networking: NetworkingContact[];
+    lawSchools?: LawSchool[];
+    scholarships?: Scholarship[];
+    milestones?: Milestone[];
+    lsatPlannedTestDate?: string | null;
   },
   basePath: string
 ): CalendarEvent[] {
@@ -81,7 +99,62 @@ export function buildCalendarEvents(
       href: `${basePath}/career`,
     }));
 
-  return [...assignmentEvents, ...certificationEvents, ...networkingEvents].sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
+  // Graduate & Law School dates. Excludes statuses where the date is
+  // already moot (rejected/enrolled, declined/awarded, completed) --
+  // showing a deadline reminder for a decision that's already made
+  // doesn't answer "what does my future look like."
+  const lawSchoolEvents: CalendarEvent[] = (input.lawSchools ?? [])
+    .filter((s) => s.application_deadline && s.status !== "rejected" && s.status !== "enrolled")
+    .map((s) => ({
+      id: s.id,
+      date: s.application_deadline!,
+      type: "law_school",
+      title: s.school_name,
+      subtitle: "Application deadline",
+      href: `${basePath}/academics/graduate-law-school/schools`,
+    }));
+
+  const scholarshipEvents: CalendarEvent[] = (input.scholarships ?? [])
+    .filter((s) => s.deadline && s.status !== "declined" && s.status !== "awarded")
+    .map((s) => ({
+      id: s.id,
+      date: s.deadline!,
+      type: "scholarship",
+      title: s.name,
+      subtitle: "Scholarship deadline",
+      href: `${basePath}/academics/graduate-law-school/scholarships`,
+    }));
+
+  const milestoneEvents: CalendarEvent[] = (input.milestones ?? [])
+    .filter((m) => m.target_date && m.status !== "completed")
+    .map((m) => ({
+      id: m.id,
+      date: m.target_date!,
+      type: "milestone",
+      title: m.title,
+      subtitle: "Milestone",
+      href: `${basePath}/academics/graduate-law-school/timeline`,
+    }));
+
+  const lsatTestDateEvents: CalendarEvent[] = input.lsatPlannedTestDate
+    ? [
+        {
+          id: "lsat-planned-test-date",
+          date: input.lsatPlannedTestDate,
+          type: "lsat_test_date",
+          title: "LSAT test date",
+          href: `${basePath}/academics/graduate-law-school/lsat`,
+        },
+      ]
+    : [];
+
+  return [
+    ...assignmentEvents,
+    ...certificationEvents,
+    ...networkingEvents,
+    ...lawSchoolEvents,
+    ...scholarshipEvents,
+    ...milestoneEvents,
+    ...lsatTestDateEvents,
+  ].sort((a, b) => a.date.localeCompare(b.date));
 }

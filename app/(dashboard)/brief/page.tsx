@@ -1,17 +1,37 @@
-import { addDays, format, startOfDay, endOfDay } from "date-fns";
+import { addDays, endOfDay, subDays } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
-import { WorkspaceHeader } from "@/components/layout/WorkspaceHeader";
+import { MissionBrief } from "@/components/brief/MissionBrief";
 import { FocusList } from "@/components/brief/FocusList";
-import { StatTile } from "@/components/brief/StatTile";
-import { GpaCard } from "@/components/brief/GpaCard";
+import { TicketModule } from "@/components/brief/instruments/TicketModule";
+import { TrackerModule } from "@/components/brief/instruments/TrackerModule";
+import { GaugeModule } from "@/components/brief/instruments/GaugeModule";
+import { honorsRangeLabel } from "@/components/brief/GpaCard";
 import { champlainUndergraduatePolicy } from "@/lib/academicPolicy/champlain";
 import { buildAcademicStandingData, type DegreeWithFullTerms } from "@/lib/academicStanding/build";
-import type { AssignmentWithContext } from "@/types/database.types";
+import { buildMissionBrief } from "@/lib/missionBrief";
+import { groupApplicationPipeline } from "@/lib/applicationPipeline";
+import { nextCertificationExam } from "@/lib/certifications";
+import { computeMomentum } from "@/lib/momentum";
+import { operatorDayLabel, operatorGreeting } from "@/lib/operatorTime";
+import type { Application, Assignment, AssignmentWithContext, Certification } from "@/types/database.types";
+
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
 
 export default async function BriefPage() {
   const supabase = await createClient();
   const now = new Date();
   const weekOut = addDays(now, 7);
+
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: profile } = authUser
+    ? await supabase.from("users").select("first_name, timezone").eq("id", authUser.id).single()
+    : { data: null };
 
   // Assignments are queried directly here — never duplicated or cached
   // separately. Academics and any future calendar view read from the same
@@ -37,50 +57,93 @@ export default async function BriefPage() {
     (a) => a.due_date && new Date(a.due_date) > endOfDay(now)
   );
 
-  const [{ count: openApplications }, { count: activeCerts }, { data: activeDegree }] = await Promise.all([
-    supabase
-      .from("applications")
-      .select("*", { count: "exact", head: true })
-      .in("status", ["applied", "phone_screen", "interviewing"]),
-    supabase
-      .from("certifications")
-      .select("*", { count: "exact", head: true })
-      .in("status", ["studying", "scheduled"]),
-    // Same active-degree rule as the due-today query above — the GPA card
-    // reflects "am I on track right now," not every degree on file.
-    supabase
-      .from("degrees")
-      .select("*, terms(*, courses(*, assignments(*)))")
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  // Full rows, not just counts — the instrument row groups applications
+  // into a real pipeline and reads the nearest certification exam date,
+  // neither of which a head-count query can answer.
+  const [{ data: applications }, { data: certifications }, { data: activeDegree }, { data: recentAssignments }] =
+    await Promise.all([
+      supabase.from("applications").select("*").in("status", ["saved", "applied", "phone_screen", "interviewing", "offer"]),
+      supabase.from("certifications").select("*").in("status", ["studying", "scheduled"]),
+      // Same active-degree rule as the due-today query above — the GPA
+      // gauge reflects "am I on track right now," not every degree on file.
+      supabase
+        .from("degrees")
+        .select("*, terms(*, courses(*, assignments(*)))")
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle(),
+      // Every assignment due in the last two weeks (any status) — the
+      // due-assignments query above deliberately excludes submitted/
+      // graded work, but Momentum needs both to compute a completion
+      // rate.
+      supabase
+        .from("assignments")
+        .select("*, course:courses!inner(term:terms!inner(degree:degrees!inner(status)))")
+        .gte("due_date", subDays(now, 14).toISOString())
+        .lt("due_date", now.toISOString())
+        .eq("course.term.degree.status", "active"),
+    ]);
+
+  const typedApplications = (applications as Application[]) ?? [];
+  const typedCertifications = (certifications as Certification[]) ?? [];
+  const pipeline = groupApplicationPipeline(typedApplications);
+  const openApplications = pipeline.saved + pipeline.applied + pipeline.interviewing + pipeline.offer;
+  const nextExam = nextCertificationExam(typedCertifications);
+  const momentum = computeMomentum((recentAssignments as Assignment[]) ?? [], now);
 
   const typedActiveDegree = activeDegree as DegreeWithFullTerms | null;
   const standing = typedActiveDegree ? buildAcademicStandingData(typedActiveDegree, champlainUndergraduatePolicy) : null;
+  const cumulativeGpa = standing?.cumulativeGpa.gpa ?? null;
+  const gpaCaption = standing ? honorsRangeLabel(standing.termGpa?.gpa ?? null) ?? "Cumulative GPA" : null;
+
+  const firstName = profile?.first_name ?? null;
+  const operatorTimeZone = profile?.timezone ?? "UTC";
+  const missionBrief = buildMissionBrief(today, upcoming, openApplications, typedCertifications.length);
 
   return (
     <div>
-      <WorkspaceHeader
-        eyebrow={`Briefing // ${format(now, "EEEE, MMMM d")}`}
-        title="What deserves your attention today"
-      />
-
-      <div className="grid grid-cols-1 gap-4 px-4 pt-6 sm:grid-cols-2 lg:grid-cols-4 md:px-8">
-        <StatTile
-          label="Due today"
-          value={String(today.length)}
-          tone={today.length > 0 ? "atRisk" : "onTrack"}
+      <div className="brief-header-treatment border-b border-border-subtle px-4 pb-8 pt-8 md:px-8">
+        <MissionBrief
+          data={missionBrief}
+          dayLabel={operatorDayLabel(now, operatorTimeZone)}
+          greeting={
+            firstName
+              ? `${operatorGreeting(now, operatorTimeZone)}, ${firstName}.`
+              : `${operatorGreeting(now, operatorTimeZone)}.`
+          }
+          momentum={momentum}
         />
-        <StatTile label="Open applications" value={String(openApplications ?? 0)} />
-        <StatTile label="Certifications in motion" value={String(activeCerts ?? 0)} />
+      </div>
+
+      <div className="flex flex-wrap items-stretch gap-4 px-4 pt-8 md:px-8">
+        <TicketModule
+          label="Due today"
+          value={today.length}
+          unit="due"
+          caption={today.length === 0 ? "Nothing due today." : "See today's focus below."}
+          attention={today.length > 0}
+        />
+        <TrackerModule pipeline={pipeline} />
         {standing && (
-          <GpaCard
-            cumulativeGpa={standing.cumulativeGpa.gpa}
-            termGpa={standing.termGpa?.gpa ?? null}
-            graduationForecast={standing.graduationForecast}
+          <GaugeModule
+            label="Standing"
+            value={cumulativeGpa !== null ? cumulativeGpa.toFixed(2) : "—"}
+            unit="gpa"
+            caption={gpaCaption ?? "Not available yet"}
+            fraction={cumulativeGpa !== null ? cumulativeGpa / 4 : 0}
+            color="signal"
+            empty={cumulativeGpa === null}
           />
         )}
+        <GaugeModule
+          label="Monitoring"
+          value={nextExam ? String(nextExam.daysUntil) : "—"}
+          unit="days"
+          caption={nextExam ? nextExam.name : "No exam scheduled"}
+          fraction={nextExam ? Math.max(0, 1 - nextExam.daysUntil / 90) : 0}
+          color="accent"
+          empty={!nextExam}
+        />
       </div>
 
       <section className="px-4 pt-8 md:px-8">

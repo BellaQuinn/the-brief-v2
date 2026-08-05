@@ -2,10 +2,12 @@ import { format, isToday, isPast } from "date-fns";
 import type { AssignmentWithContext } from "@/types/database.types";
 import { cn } from "@/lib/utils";
 
+// An urgency gradient, not a status readout — green is reserved for
+// success/on-track meaning elsewhere, so it doesn't appear here.
 const PRIORITY_DOT: Record<AssignmentWithContext["priority"], string> = {
-  urgent: "bg-seal",
-  high: "bg-status-atRisk",
-  medium: "bg-signal",
+  urgent: "bg-status-atRisk",
+  high: "bg-seal",
+  medium: "bg-accent",
   low: "bg-ink-tertiary",
 };
 
@@ -25,7 +27,7 @@ export function FocusList({ items }: { items: AssignmentWithContext[] }) {
         const overdue = due ? isPast(due) && !isToday(due) : false;
 
         return (
-          <li key={item.id} className="flex items-center gap-3 px-4 py-3">
+          <li key={item.id} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-raised/50">
             <span
               className={cn("h-1.5 w-1.5 shrink-0 rounded-full", PRIORITY_DOT[item.priority])}
               aria-hidden

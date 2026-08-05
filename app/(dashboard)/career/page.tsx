@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { CareerClient } from "@/components/career/CareerClient";
 import type { Application, Certification, NetworkingContact, User } from "@/types/database.types";
 
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
+
 type ResumeProfile = Pick<User, "resume_url" | "resume_updated_at">;
 
 export default async function CareerPage() {

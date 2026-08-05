@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --font-mono: "IBM Plex Mono", monospace;
+    --font-sans: "Inter", system-ui, sans-serif;
   }
 
   * {
@@ -16,41 +17,17 @@
   }
 
   body {
-    @apply bg-background text-ink-primary font-mono antialiased;
-    position: relative;
-    text-shadow: 0 0 1px currentColor;
-    animation: crt-flicker 6s steps(1, end) infinite;
-  }
-
-  @keyframes crt-flicker {
-    0%, 92%, 93%, 95%, 96%, 100% { filter: brightness(1); }
-    92.5% { filter: brightness(0.96); }
-    95.5% { filter: brightness(0.985); }
-  }
-
-  /* CRT scanlines — fixed overlay above all content, doesn't block input */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.15) 0px,
-      rgba(0, 0, 0, 0.15) 1px,
-      transparent 1px,
-      transparent 3px
-    );
+    @apply bg-background text-ink-primary font-sans antialiased;
   }
 
   ::selection {
     @apply bg-signal/30 text-ink-primary;
   }
 
-  /* Visible keyboard focus everywhere — no exceptions */
+  /* Visible keyboard focus everywhere — no exceptions. Accent (blue), not
+     signal (green) — green stays reserved for status/success meaning. */
   :focus-visible {
-    outline: 2px solid theme("colors.signal.DEFAULT");
+    outline: 2px solid theme("colors.accent.DEFAULT");
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -72,7 +49,145 @@
      every section: mono, uppercase, wide tracking. Encodes "this is a
      classification/heading line," not decoration. */
   .eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-eyebrow text-ink-tertiary;
+    @apply font-mono text-[11px] uppercase tracking-eyebrow text-ink-secondary;
+  }
+
+  /* Shared workspace header atmosphere. This is a real background layer,
+     not an oversized decorative orb, so mobile cannot clip the brand color
+     away. The same blue/green mix is preserved at every breakpoint; desktop
+     simply has more room for it to breathe. */
+  .workspace-header-treatment {
+    background-color: theme("colors.background");
+    background-image: linear-gradient(
+      108deg,
+      rgba(16, 185, 129, 0.15) 0%,
+      rgba(16, 185, 129, 0.075) 34%,
+      rgba(59, 130, 246, 0.09) 68%,
+      rgba(59, 130, 246, 0.18) 100%
+    );
+  }
+
+  /* The Brief is the product's green-led Mission Control surface. Its
+     mobile-only chrome must match the desktop identity instead of borrowing
+     the blue-led informational treatment used by secondary workspaces. */
+  .brief-header-treatment {
+    background-color: theme("colors.background");
+    background-image:
+      radial-gradient(ellipse at 88% 0%, rgba(16, 185, 129, 0.19), transparent 60%),
+      linear-gradient(112deg, rgba(16, 185, 129, 0.08), transparent 50%);
+  }
+
+  @media (min-width: 768px) {
+    .workspace-header-treatment {
+      background-image:
+        radial-gradient(ellipse at 86% 5%, rgba(59, 130, 246, 0.15), transparent 52%),
+        linear-gradient(112deg, rgba(16, 185, 129, 0.055), transparent 42%);
+    }
+  }
+
+  /* Instrument frame — open corner-bracket marks instead of a full
+     border, so an instrument module reads as equipment rather than a
+     dashboard card. Color set per instance via --corner (four variants
+     below). Not expressible as a plain Tailwind utility, same reasoning
+     as .eyebrow above. */
+  .instrument-frame {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.015);
+    background-image: linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0),
+      linear-gradient(var(--corner) 0 0), linear-gradient(var(--corner) 0 0);
+    background-size: 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px, 11px 1.5px, 1.5px 11px;
+    background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right,
+      bottom right;
+    background-repeat: no-repeat;
+  }
+  .instrument-frame-seal {
+    --corner: theme("colors.seal.DEFAULT");
+  }
+  .instrument-frame-accent {
+    --corner: theme("colors.accent.DEFAULT");
+  }
+  .instrument-frame-signal {
+    --corner: theme("colors.signal.DEFAULT");
+  }
+  .instrument-frame-neutral {
+    --corner: theme("colors.border.strong");
+  }
+
+  /* Smaller reticle marks for the active sidebar nav icon — ties the
+     sidebar's visual language to the instrument modules above. */
+  .nav-frame-active {
+    background-image: linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0), linear-gradient(theme("colors.signal.DEFAULT") 0 0),
+      linear-gradient(theme("colors.signal.DEFAULT") 0 0);
+    background-size: 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px, 5px 1.3px, 1.3px 5px;
+    background-position: top left, top left, top right, top right, bottom left, bottom left, bottom right,
+      bottom right;
+    background-repeat: no-repeat;
+  }
+
+  /* The shared quantitative canvas. Pages plot different facts inside it,
+     but the field itself never changes: open sides, a faint measurement
+     grid, and one short status-colored calibration line. */
+  .signal-field {
+    --field-accent: theme("colors.signal.DEFAULT");
+    position: relative;
+    border-top: 1px solid theme("colors.border.subtle");
+    border-bottom: 1px solid theme("colors.border.subtle");
+    background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+  }
+  .signal-field::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -1px;
+    width: 64px;
+    height: 1px;
+    background: var(--field-accent);
+  }
+  .signal-field-accent {
+    --field-accent: theme("colors.accent.DEFAULT");
+  }
+
+  /* One shared branching language for courses, evidence, honors, and
+     requirements. A trace is deliberately open: the rail owns hierarchy;
+     individual records never need their own box. */
+  .trace-rail {
+    position: relative;
+  }
+  .trace-rail::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    bottom: 16px;
+    width: 1px;
+    background: linear-gradient(to bottom, theme("colors.accent.DEFAULT"), theme("colors.border.strong"), transparent);
+    opacity: 0.65;
+  }
+  .trace-node {
+    position: absolute;
+    left: 9px;
+    top: 1.5rem;
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    border: 1px solid theme("colors.accent.DEFAULT");
+    background: theme("colors.background");
+  }
+  .trace-connector {
+    position: absolute;
+    left: 13px;
+    top: calc(1.5rem + 3px);
+    width: 16px;
+    height: 1px;
+    background: theme("colors.border.strong");
   }
 }
 

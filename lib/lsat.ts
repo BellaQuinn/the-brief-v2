@@ -1,4 +1,63 @@
-import type { LsatPracticeTest } from "@/types/database.types";
+import type { LsatGoalCheckpoint, LsatPracticeTest } from "@/types/database.types";
+
+type ScoredSection = "logical_reasoning_score" | "reading_comprehension_score" | "analytical_reasoning_score";
+
+export interface SectionStats {
+  average: number | null;
+  // "improving" / "declining" compares this section's first-recorded vs.
+  // most-recent-recorded score for THIS section specifically -- a fair,
+  // same-unit comparison. There's deliberately no cross-section "weakest"
+  // verdict: LR, RC, and AR have different question counts on the real
+  // exam, so comparing raw averages across sections would be a claim this
+  // data can't actually back.
+  trend: "improving" | "declining" | "flat" | null;
+}
+
+export interface SectionAverages {
+  logicalReasoning: SectionStats;
+  readingComprehension: SectionStats;
+  analyticalReasoning: SectionStats;
+}
+
+// Fewer than this many scored data points for a section, and neither an
+// average nor a trend is shown for it -- one data point isn't a pattern.
+const MIN_SCORES_FOR_SECTION_STATS = 2;
+
+function sectionStats(tests: LsatPracticeTest[], field: ScoredSection): SectionStats {
+  const scored = tests
+    .filter((t) => t[field] != null)
+    .sort((a, b) => a.test_date.localeCompare(b.test_date));
+  if (scored.length < MIN_SCORES_FOR_SECTION_STATS) {
+    return { average: null, trend: null };
+  }
+  const values = scored.map((t) => t[field] as number);
+  const average = values.reduce((sum, v) => sum + v, 0) / values.length;
+  const delta = values[values.length - 1]! - values[0]!;
+  const trend = delta > 0 ? "improving" : delta < 0 ? "declining" : "flat";
+  return { average, trend };
+}
+
+export function sectionAverages(tests: LsatPracticeTest[]): SectionAverages {
+  return {
+    logicalReasoning: sectionStats(tests, "logical_reasoning_score"),
+    readingComprehension: sectionStats(tests, "reading_comprehension_score"),
+    analyticalReasoning: sectionStats(tests, "analytical_reasoning_score"),
+  };
+}
+
+// Sorted ascending by date -- the order a goal-gap chart plots them in.
+export function sortCheckpoints(checkpoints: LsatGoalCheckpoint[]): LsatGoalCheckpoint[] {
+  return [...checkpoints].sort((a, b) => a.target_date.localeCompare(b.target_date));
+}
+
+// The next checkpoint whose date hasn't passed yet -- what the workspace
+// brief and directive should actually name, not just "the goal" in the
+// abstract.
+export function nextCheckpoint(checkpoints: LsatGoalCheckpoint[], today: Date = new Date()): LsatGoalCheckpoint | null {
+  const key = today.toISOString().slice(0, 10);
+  const upcoming = sortCheckpoints(checkpoints).filter((c) => c.target_date >= key);
+  return upcoming[0] ?? null;
+}
 
 export function latestScore(tests: LsatPracticeTest[]): number | null {
   const withScores = tests.filter((t) => t.scaled_score != null);

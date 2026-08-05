@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { MobileTopBar } from "@/components/layout/MobileTopBar";
 import { MobileSignOutButton } from "@/components/layout/MobileSignOutButton";
+import { BootSequence } from "@/components/layout/BootSequence";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -24,6 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex">
+      <BootSequence />
       <Sidebar user={profile} />
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <MobileTopBar right={<MobileSignOutButton />} />

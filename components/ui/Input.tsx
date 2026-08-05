@@ -3,8 +3,10 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
+// Focus uses accent (blue) rather than signal (green) — green stays a
+// status/success color, focus is a functional/informational state.
 const fieldClasses =
-  "w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-ink-primary outline-none transition-colors placeholder:text-ink-tertiary focus:border-signal";
+  "w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-ink-primary outline-none transition-colors placeholder:text-ink-tertiary focus:border-accent focus:ring-2 focus:ring-accent/15";
 
 function FieldLabel({ label, htmlFor }: { label?: string; htmlFor?: string }) {
   if (!label) return null;

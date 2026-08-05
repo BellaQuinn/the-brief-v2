@@ -1,7 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { GraduateLawSchoolOverview } from "@/components/graduateLawSchool/GraduateLawSchoolOverview";
+import { sortMilestones } from "@/components/graduateLawSchool/MilestoneRoadmap";
 import { latestScore } from "@/lib/lsat";
 import type { LawSchool, LsatPracticeTest, Milestone, Scholarship } from "@/types/database.types";
+
+// Every dashboard page shows session-specific data (this operator's
+// own records) -- force-dynamic guarantees Next/Vercel never serve a
+// cached render across users, sessions, or time, regardless of whether
+// automatic dynamic-rendering detection would already cover it.
+export const dynamic = "force-dynamic";
 
 export default async function GraduateLawSchoolOverviewPage() {
   const supabase = await createClient();
@@ -42,6 +49,7 @@ export default async function GraduateLawSchoolOverviewPage() {
       schools={typedSchools}
       scholarships={typedScholarships}
       deadlines={deadlines}
+      milestones={sortMilestones(typedMilestones)}
       lsatGoalScore={profile?.lsat_goal_score ?? null}
       lsatLatestScore={latestScore((practiceTests as LsatPracticeTest[]) ?? [])}
     />
