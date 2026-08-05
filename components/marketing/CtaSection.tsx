@@ -10,14 +10,14 @@ export function CtaSection() {
           Bring your own briefing.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-secondary">
-          Look around with the demo, or set up your own account and start with a real degree.
+          Stop wondering what deserves your attention today. Open The Brief, read your briefing, and act on it.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#demo"
             className="flex items-center gap-1.5 rounded-lg bg-ink-primary px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
-            View the live demo
+            Enter Mission Control
             <ArrowRight className="h-4 w-4" aria-hidden />
           </a>
           <Link

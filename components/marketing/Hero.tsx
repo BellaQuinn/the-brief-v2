@@ -11,16 +11,17 @@ export function Hero() {
           Mission control for ambitious nontraditional students.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-ink-secondary md:text-lg">
-          The Brief pulls your degree, your certifications, your job search, and — if it applies — your law school
-          applications into one daily briefing. Not another place to enter data twice; the one place that already
-          knows what&apos;s due, what&apos;s next, and whether you&apos;re actually on track.
+          The Brief is an automated academic and professional operating system. It connects your coursework, career
+          planning, certifications, applications, and long-term goals into one responsive workspace — not another
+          place to enter data twice, the one place that already knows what&apos;s due, what&apos;s next, and whether
+          you&apos;re actually on track.
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#demo"
             className="flex items-center gap-1.5 rounded-lg bg-ink-primary px-5 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
-            View the live demo
+            Enter Mission Control
             <ArrowRight className="h-4 w-4" aria-hidden />
           </a>
           <Link

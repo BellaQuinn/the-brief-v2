@@ -1,18 +1,21 @@
-const PRINCIPLES = [
+const COMPARISONS = [
   {
-    title: "No invented confidence",
-    detail:
-      "If The Brief says you're on track, it's because the math behind it says so — every calculation shows its own basis, not just a headline number.",
-  },
-  {
-    title: "Enter it once",
+    other: "Track tasks.",
+    brief: "Coordinates your entire academic and career operation.",
     detail:
       "A grade, a due date, a deadline — entered once at the source and it flows upward automatically: assignment → course → GPA → calendar → reminders. Never re-typed.",
   },
   {
-    title: "AI proposes, you decide",
+    other: "Store files.",
+    brief: "Turns a syllabus into ready-to-review, ready-to-accept assignments.",
     detail:
       "Syllabus extraction and study-plan suggestions are always reviewed one at a time — accept, edit, or dismiss. Nothing reaches your real record without you saying yes.",
+  },
+  {
+    other: "Tell you what you want to hear.",
+    brief: "Shows its own math.",
+    detail:
+      "If The Brief says you're on track, it's because the math behind it says so — every calculation shows its own basis, not just a headline number. No invented confidence.",
   },
 ];
 
@@ -36,10 +39,17 @@ export function AudienceSection() {
           <div>
             <p className="eyebrow">Why it's different</p>
             <div className="mt-3 space-y-5">
-              {PRINCIPLES.map((principle) => (
-                <div key={principle.title}>
-                  <h3 className="text-sm font-medium text-ink-primary">{principle.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-ink-tertiary">{principle.detail}</p>
+              {COMPARISONS.map((c) => (
+                <div key={c.brief} className="border-l-2 border-border-strong pl-4">
+                  <p className="flex items-baseline gap-2 text-sm text-ink-tertiary line-through decoration-ink-tertiary/50">
+                    <span className="not-italic text-status-atRisk no-underline">✕</span>
+                    Other apps: {c.other}
+                  </p>
+                  <p className="mt-1 flex items-baseline gap-2 text-sm font-medium text-ink-primary">
+                    <span className="text-signal">✓</span>
+                    The Brief: {c.brief}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-tertiary">{c.detail}</p>
                 </div>
               ))}
             </div>

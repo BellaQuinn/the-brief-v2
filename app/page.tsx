@@ -16,9 +16,9 @@ export default function RootPage() {
     <main className="min-h-screen bg-background">
       <MarketingNav />
       <Hero />
+      <PreviewSection />
       <ProblemSection />
       <FeaturesSection />
-      <PreviewSection />
       <AudienceSection />
       <StatusSection />
       <CtaSection />
