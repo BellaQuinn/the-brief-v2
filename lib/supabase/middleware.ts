@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublicRoute) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
+    redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);
   }
 
