@@ -14,7 +14,7 @@ export function MarketingNav() {
           </div>
         </div>
         <nav className="flex items-center gap-4 text-sm">
-          <Link href="/guide" className="hidden text-ink-secondary transition-colors hover:text-ink-primary sm:inline">
+          <Link href="/guide" className="text-ink-secondary transition-colors hover:text-ink-primary">
             Guide
           </Link>
           <Link href="/progress" className="hidden text-ink-secondary transition-colors hover:text-ink-primary sm:inline">
