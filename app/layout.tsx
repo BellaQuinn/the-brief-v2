@@ -15,7 +15,7 @@ const sansFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Brief — Mission Control for ambitious nontraditional students",
+  title: "The Brief — Mission Control for ambitious professionals",
   description:
     "The Brief reduces the cognitive load of balancing school, work, certifications, and career advancement into one daily briefing.",
   icons: {

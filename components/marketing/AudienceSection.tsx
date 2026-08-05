@@ -32,8 +32,7 @@ export function AudienceSection() {
             <p className="mt-4 text-base leading-relaxed text-ink-secondary">
               Working full-time while finishing a degree. Stacking a certification on top of a job search. Aiming a
               bachelor&apos;s toward law school on nights and weekends. If your calendar already has more than one
-              kind of deadline on it, The Brief was built with your exact situation in mind — not a traditional
-              full-time student&apos;s.
+              kind of deadline on it, The Brief was built with your exact situation in mind.
             </p>
           </div>
           <div>

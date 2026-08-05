@@ -8,7 +8,7 @@ export function Hero() {
       <div className="mx-auto max-w-3xl text-center">
         <p className="eyebrow justify-center">Personal operating system</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-ink-primary md:text-6xl">
-          Mission control for ambitious nontraditional students.
+          Mission control for ambitious professionals.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-ink-secondary md:text-lg">
           The Brief is an automated academic and professional operating system. It connects your coursework, career
